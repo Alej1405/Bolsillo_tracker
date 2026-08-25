@@ -1,0 +1,154 @@
+# Despliegue continuo de Bolsillo.
+#
+# Cada push a main valida, compila y publica el sitio en el VPS por SSH.
+# El servidor solo recibe el dist/ ya compilado: no hay Node ni npm en producción.
+#
+# Este repositorio es público, así que el workflow está escrito partiendo de que
+# cualquiera puede leerlo y de que cualquiera puede abrir un pull request:
+#
+#   · Ningún dato del servidor está escrito aquí. Host, usuario y ruta viven en
+#     los Secrets del repositorio, que GitHub nunca expone a un fork.
+#   · La validación y el despliegue están en trabajos separados. El trabajo que
+#     toca los secretos no corre nunca desde un pull request.
+#   · Las acciones van fijadas por SHA, no por etiqueta: una etiqueta se puede
+#     reapuntar a otro commit, un SHA no.
+#   · El host se verifica contra una huella conocida en vez de aceptar la que
+#     ofrezca el servidor, que es lo que permitiría un man-in-the-middle.
+#
+# La clave de despliegue está restringida en el servidor y solo puede escribir
+# en el directorio del sitio. Ver docs/DESPLIEGUE.md.
+
+name: Desplegar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Solo lectura del repositorio: el workflow no escribe código ni releases.
+permissions:
+  contents: read
+
+# Un despliegue a la vez. Si llegan dos pushes seguidos, el viejo se cancela
+# para que no se pisen a mitad de la subida y dejen el sitio a medias.
+concurrency:
+  group: desplegar-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERSION_NODE: '22'
+
+jobs:
+  validar:
+    name: Validar y compilar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Traer el código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Preparar Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.VERSION_NODE }}
+          cache: npm
+
+      # npm ci instala exactamente lo del package-lock.json y falla si no coincide
+      # con package.json. En CI eso es lo que se quiere: nada de resolver versiones
+      # nuevas por su cuenta y desplegar algo distinto a lo que probaste local.
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Revisar el código
+        run: npm run lint
+
+      - name: Compilar
+        run: npm run build
+
+      - name: Comprobar que el build sirve
+        run: |
+          test -f dist/index.html || { echo "::error::El build no generó index.html"; exit 1; }
+          echo "Peso del sitio: $(du -sh dist | cut -f1)"
+
+      - name: Guardar el resultado
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sitio
+          path: dist/
+          retention-days: 5
+
+  desplegar:
+    name: Publicar en el VPS
+    needs: validar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # El corazón de la protección. Este trabajo toca los secretos, así que solo
+    # corre en un push directo a main de ESTE repositorio. Un pull request —
+    # venga de donde venga — se queda en el trabajo de validación.
+    if: >-
+      github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main' &&
+      github.repository == 'Alej1405/Bolsillo_tracker'
+
+    # Permite exigir aprobación manual desde Settings → Environments.
+    environment:
+      name: produccion
+      url: https://bolsillo.mashaec.net
+
+    steps:
+      - name: Recuperar el sitio compilado
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sitio
+          path: dist
+
+      # La clave se escribe en un archivo con permisos 600 porque ssh se niega a
+      # usar una clave que otros puedan leer. La huella del host se fija desde un
+      # secreto: así ssh corta la conexión si el servidor que responde no es el
+      # nuestro, en vez de confiar a ciegas en quien conteste.
+      - name: Preparar el acceso SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/despliegue
+          chmod 600 ~/.ssh/despliegue
+          printf '%s\n' "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Subir el sitio
+        env:
+          DESTINO: ${{ secrets.VPS_USUARIO }}@${{ secrets.VPS_HOST }}
+        run: |
+          rsync -rlptz --delete --checksum \
+            -e "ssh -i ~/.ssh/despliegue -p ${{ secrets.VPS_PUERTO || 22 }} -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            dist/ "$DESTINO:."
+
+      - name: Borrar la clave del runner
+        if: always()
+        run: rm -f ~/.ssh/despliegue
+
+      # Cloudflare cachea los estáticos. Sin este paso el HTML nuevo puede tardar
+      # en verse. Los dos secretos son opcionales: si no están, el paso se salta.
+      - name: Limpiar la caché de Cloudflare
+        if: ${{ secrets.CF_ZONA != '' && secrets.CF_TOKEN != '' }}
+        run: |
+          curl -sS -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${{ secrets.CF_ZONA }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CF_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"hosts":["bolsillo.mashaec.net"]}' \
+            -o /dev/null -w 'Caché purgada: HTTP %{http_code}\n'
+
+      - name: Comprobar que el sitio responde
+        run: |
+          for intento in 1 2 3; do
+            codigo=$(curl -sS -o /dev/null -w '%{http_code}' https://bolsillo.mashaec.net || echo 000)
+            [ "$codigo" = "200" ] && { echo "El sitio responde 200"; exit 0; }
+            echo "Intento $intento: HTTP $codigo. Reintento en 10 s."
+            sleep 10
+          done
+          echo "::error::El sitio no respondió 200 después del despliegue"
+          exit 1

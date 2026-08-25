@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 894 396" width="894" height="396" role="img" aria-label="Paleta del sistema de diseno de Bolsillo">
+<style>text{font-family:Inter,Segoe UI,system-ui,sans-serif}</style>
+<rect width="894" height="396" rx="18" fill="#f6f4fc"/>
+<text x="24" y="34" font-size="15" font-weight="700" fill="#0f172a">Sistema de diseno · paleta</text>
+<text x="24" y="92.0" font-size="13" font-weight="600" fill="#334155">Lavanda</text>
+<rect x="132" y="56" width="96" height="62" rx="12" fill="#f6f4fc" stroke="#e2e8f0"/>
+<text x="144" y="80" font-size="11.5" font-weight="700" fill="#0f172a">50</text>
+<text x="144" y="99" font-size="10.5" fill="#0f172a" opacity=".82">#F6F4FC</text>
+<rect x="238" y="56" width="96" height="62" rx="12" fill="#ece9f6" stroke="#e2e8f0"/>
+<text x="250" y="80" font-size="11.5" font-weight="700" fill="#0f172a">100</text>
+<text x="250" y="99" font-size="10.5" fill="#0f172a" opacity=".82">#ECE9F6</text>
+<rect x="344" y="56" width="96" height="62" rx="12" fill="#dcd9ee" stroke="#e2e8f0"/>
+<text x="356" y="80" font-size="11.5" font-weight="700" fill="#0f172a">300</text>
+<text x="356" y="99" font-size="10.5" fill="#0f172a" opacity=".82">#DCD9EE</text>
+<rect x="450" y="56" width="96" height="62" rx="12" fill="#c5b6d3" stroke="#e2e8f0"/>
+<text x="462" y="80" font-size="11.5" font-weight="700" fill="#0f172a">500</text>
+<text x="462" y="99" font-size="10.5" fill="#0f172a" opacity=".82">#C5B6D3</text>
+<rect x="556" y="56" width="96" height="62" rx="12" fill="#7c628b"/>
+<text x="568" y="80" font-size="11.5" font-weight="700" fill="#ffffff">700</text>
+<text x="568" y="99" font-size="10.5" fill="#ffffff" opacity=".82">#7C628B</text>
+<rect x="662" y="56" width="96" height="62" rx="12" fill="#553d78"/>
+<text x="674" y="80" font-size="11.5" font-weight="700" fill="#ffffff">900</text>
+<text x="674" y="99" font-size="10.5" fill="#ffffff" opacity=".82">#553D78</text>
+<rect x="768" y="56" width="96" height="62" rx="12" fill="#37284e"/>
+<text x="780" y="80" font-size="11.5" font-weight="700" fill="#ffffff">950</text>
+<text x="780" y="99" font-size="10.5" fill="#ffffff" opacity=".82">#37284E</text>
+<text x="24" y="180.0" font-size="13" font-weight="600" fill="#334155">Marca</text>
+<rect x="132" y="144" width="96" height="62" rx="12" fill="#f1f5f9" stroke="#e2e8f0"/>
+<text x="144" y="168" font-size="11.5" font-weight="700" fill="#0f172a">50</text>
+<text x="144" y="187" font-size="10.5" fill="#0f172a" opacity=".82">#F1F5F9</text>
+<rect x="238" y="144" width="96" height="62" rx="12" fill="#57708b"/>
+<text x="250" y="168" font-size="11.5" font-weight="700" fill="#ffffff">600</text>
+<text x="250" y="187" font-size="10.5" fill="#ffffff" opacity=".82">#57708B</text>
+<rect x="344" y="144" width="96" height="62" rx="12" fill="#45596f"/>
+<text x="356" y="168" font-size="11.5" font-weight="700" fill="#ffffff">700</text>
+<text x="356" y="187" font-size="10.5" fill="#ffffff" opacity=".82">#45596F</text>
+<rect x="450" y="144" width="96" height="62" rx="12" fill="#3d4e64"/>
+<text x="462" y="168" font-size="11.5" font-weight="700" fill="#ffffff">800</text>
+<text x="462" y="187" font-size="10.5" fill="#ffffff" opacity=".82">#3D4E64</text>
+<rect x="556" y="144" width="96" height="62" rx="12" fill="#283445"/>
+<text x="568" y="168" font-size="11.5" font-weight="700" fill="#ffffff">900</text>
+<text x="568" y="187" font-size="10.5" fill="#ffffff" opacity=".82">#283445</text>
+<text x="24" y="268.0" font-size="13" font-weight="600" fill="#334155">Tinta</text>
+<rect x="132" y="232" width="96" height="62" rx="12" fill="#f1f5f9" stroke="#e2e8f0"/>
+<text x="144" y="256" font-size="11.5" font-weight="700" fill="#0f172a">100</text>
+<text x="144" y="275" font-size="10.5" fill="#0f172a" opacity=".82">#F1F5F9</text>
+<rect x="238" y="232" width="96" height="62" rx="12" fill="#cbd5e1" stroke="#e2e8f0"/>
+<text x="250" y="256" font-size="11.5" font-weight="700" fill="#0f172a">300</text>
+<text x="250" y="275" font-size="10.5" fill="#0f172a" opacity=".82">#CBD5E1</text>
+<rect x="344" y="232" width="96" height="62" rx="12" fill="#64748b"/>
+<text x="356" y="256" font-size="11.5" font-weight="700" fill="#ffffff">500</text>
+<text x="356" y="275" font-size="10.5" fill="#ffffff" opacity=".82">#64748B</text>
+<rect x="450" y="232" width="96" height="62" rx="12" fill="#334155"/>
+<text x="462" y="256" font-size="11.5" font-weight="700" fill="#ffffff">700</text>
+<text x="462" y="275" font-size="10.5" fill="#ffffff" opacity=".82">#334155</text>
+<rect x="556" y="232" width="96" height="62" rx="12" fill="#0f172a"/>
+<text x="568" y="256" font-size="11.5" font-weight="700" fill="#ffffff">900</text>
+<text x="568" y="275" font-size="10.5" fill="#ffffff" opacity=".82">#0F172A</text>
+<text x="24" y="356.0" font-size="13" font-weight="600" fill="#334155">Estado</text>
+<rect x="132" y="320" width="96" height="62" rx="12" fill="#15803d"/>
+<text x="144" y="344" font-size="11.5" font-weight="700" fill="#ffffff">ingreso</text>
+<text x="144" y="363" font-size="10.5" fill="#ffffff" opacity=".82">#15803D</text>
+<rect x="238" y="320" width="96" height="62" rx="12" fill="#b91c1c"/>
+<text x="250" y="344" font-size="11.5" font-weight="700" fill="#ffffff">gasto</text>
+<text x="250" y="363" font-size="10.5" fill="#ffffff" opacity=".82">#B91C1C</text>
+<rect x="344" y="320" width="96" height="62" rx="12" fill="#b45309"/>
+<text x="356" y="344" font-size="11.5" font-weight="700" fill="#ffffff">aviso</text>
+<text x="356" y="363" font-size="10.5" fill="#ffffff" opacity=".82">#B45309</text>
+<rect x="450" y="320" width="96" height="62" rx="12" fill="#2563eb"/>
+<text x="462" y="344" font-size="11.5" font-weight="700" fill="#ffffff">gráfico 1</text>
+<text x="462" y="363" font-size="10.5" fill="#ffffff" opacity=".82">#2563EB</text>
+<rect x="556" y="320" width="96" height="62" rx="12" fill="#0d9488"/>
+<text x="568" y="344" font-size="11.5" font-weight="700" fill="#ffffff">gráfico 3</text>
+<text x="568" y="363" font-size="10.5" fill="#ffffff" opacity=".82">#0D9488</text>
+</svg>

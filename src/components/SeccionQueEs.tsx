@@ -4,12 +4,12 @@ import { FilaMovimiento } from '@/components/piezas'
 
 export function SeccionQueEs() {
   return (
-    <section id="que-es" className="px-4 py-24 md:px-8 lg:px-[130px]">
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-6">
+    <section id="que-es" className="px-4 py-24 md:px-8 lg:px-32.5">
+      <div className="mx-auto flex max-w-295 flex-col gap-6">
         {/* Fila 1: titular sobre foto + celda de dato */}
         <div className="grid gap-6 lg:grid-cols-[1.65fr_1fr]">
           <Revelar className="h-full">
-            <div className="relative flex h-full min-h-[340px] flex-col justify-end overflow-hidden rounded-[var(--radius-extra)] p-10">
+            <div className="relative flex h-full min-h-85 flex-col justify-end overflow-hidden rounded-extra[var(--radius-extra)] p-10">
               <img src={hero} alt="" className="absolute inset-0 size-full object-cover" />
               <div className="absolute inset-0 bg-lavanda-950/60" />
               <div className="relative">
