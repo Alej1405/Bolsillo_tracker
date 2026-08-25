@@ -117,11 +117,10 @@
     Es el material que unifica toda la landing sobre la fotografía.
   */
   .vidrio {
-    background-color: color-mix(in srgb, #ffffff 62%, transparent);
-    border: 1px solid color-mix(in srgb, #ffffff 72%, transparent);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 30%, transparent);
+    background-color: color-mix(in srgb, #ffffff 1%, transparent);
+    backdrop-filter: blur(8.5px);
+    -webkit-backdrop-filter: blur(10px);
+    /* box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 30%, transparent); */
   }
 
   .vidrio-oscuro {
