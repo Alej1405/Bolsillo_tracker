@@ -122,11 +122,14 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
+      # --chmod fija los permisos desde aquí en vez de heredarlos del umask del
+      # runner: así nginx (que corre como www-data) siempre puede leer los
+      # archivos, sin depender del entorno donde se ejecute el despliegue.
       - name: Subir el sitio
         env:
           DESTINO: ${{ secrets.VPS_USUARIO }}@${{ secrets.VPS_HOST }}
         run: |
-          rsync -rlptz --delete --checksum \
+          rsync -rlptz --delete --checksum --chmod=D755,F644 \
             -e "ssh -i ~/.ssh/despliegue -p ${{ secrets.VPS_PUERTO || 22 }} -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
             dist/ "$DESTINO:."
 
