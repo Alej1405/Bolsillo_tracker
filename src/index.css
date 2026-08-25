@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/*
+  Sistema de diseño de Bolsillo.
+  Los tokens salen del archivo de Figma "Proyecto RDA": la escala lavanda
+  se extrajo de la propia fotografía del hero; el resto son las variables
+  Color y Dimensiones del UI Kit. Nombres en español, como en el archivo.
+*/
+@theme {
+  /* ── Escala lavanda (de la foto del hero) ── */
+  --color-lavanda-50: #f6f4fc;
+  --color-lavanda-100: #ece9f6;
+  --color-lavanda-200: #e5e3f0;
+  --color-lavanda-300: #dcd9ee;
+  --color-lavanda-400: #cec9e6;
+  --color-lavanda-500: #c5b6d3;
+  --color-lavanda-600: #9f89ab;
+  --color-lavanda-700: #7c628b;
+  --color-lavanda-800: #62507a;
+  --color-lavanda-900: #553d78;
+  --color-lavanda-950: #37284e;
+
+  /* ── Tinta (neutros) ── */
+  --color-tinta-50: #f8fafc;
+  --color-tinta-100: #f1f5f9;
+  --color-tinta-200: #e2e8f0;
+  --color-tinta-300: #cbd5e1;
+  --color-tinta-400: #94a3b8;
+  --color-tinta-500: #64748b;
+  --color-tinta-600: #475569;
+  --color-tinta-700: #334155;
+  --color-tinta-800: #1e293b;
+  --color-tinta-900: #0f172a;
+  --color-tinta-950: #020617;
+
+  /* ── Marca (azul-pizarra del UI Kit) ── */
+  --color-marca-50: #f1f5f9;
+  --color-marca-600: #57708b;
+  --color-marca-700: #45596f;
+  --color-marca-800: #3d4e64;
+  --color-marca-900: #283445;
+
+  /* ── Semánticos ── */
+  --color-fondo-lienzo: #f8fafc;
+  --color-fondo-superficie: #ffffff;
+  --color-fondo-sutil: #f1f5f9;
+  --color-fondo-inverso: #0f172a;
+
+  --color-texto-principal: #0f172a;
+  --color-texto-secundario: #475569;
+  --color-texto-tenue: #64748b;
+  --color-texto-inverso: #ffffff;
+  --color-texto-sobre-marca: #ffffff;
+  --color-texto-enlace: #45596f;
+
+  --color-borde-normal: #e2e8f0;
+  --color-borde-sutil: #f1f5f9;
+
+  --color-accion-principal: #57708b;
+  --color-accion-principal-encima: #45596f;
+
+  --color-ingreso: #15803d;
+  --color-ingreso-sutil: #f0fdf4;
+  --color-gasto: #b91c1c;
+  --color-gasto-sutil: #fef2f2;
+  --color-aviso: #b45309;
+  --color-aviso-sutil: #fffbeb;
+
+  /* Gráficos */
+  --color-grafico-1: #2563eb;
+  --color-grafico-2: #ea580c;
+  --color-grafico-3: #0d9488;
+  --color-grafico-4: #7c3aed;
+  --color-grafico-5: #65a30d;
+
+  /* ── Tipografía ── */
+  --font-titulo: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-cuerpo: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Radios ── */
+  --radius-pequeno: 6px;
+  --radius-medio: 10px;
+  --radius-grande: 14px;
+  --radius-extra: 20px;
+  --radius-maximo: 28px;
+
+  /* ── Curvas de easing. Espejo de `curva` en movimiento/curvas.ts:
+     si cambias una, cambia la otra. ── */
+  --ease-salida: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-suave: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@layer base {
+  /* Scroll suave para los enlaces de ancla de la barra de navegación. */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-cuerpo);
+    color: var(--color-texto-principal);
+    background-color: var(--color-lavanda-100);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-lavanda-300);
+    color: var(--color-lavanda-950);
+  }
+}
+
+@layer components {
+  /*
+    Vidrio esmerilado: relleno translúcido, borde interior de 1px,
+    desenfoque de fondo y sombra tintada en lavanda (nunca negra).
+    Es el material que unifica toda la landing sobre la fotografía.
+  */
+  .vidrio {
+    background-color: color-mix(in srgb, #ffffff 62%, transparent);
+    border: 1px solid color-mix(in srgb, #ffffff 72%, transparent);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 30%, transparent);
+  }
+
+  .vidrio-oscuro {
+    background-color: color-mix(in srgb, var(--color-lavanda-950) 88%, transparent);
+    border: 1px solid color-mix(in srgb, #ffffff 16%, transparent);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    box-shadow: 0 28px 70px -20px color-mix(in srgb, var(--color-lavanda-950) 45%, transparent);
+  }
+
+  /*
+    Panel de las pantallas de acceso (login / registro). NO es una tarjeta:
+    ocupa la mitad completa de la pantalla, a sangre, con el azul-pizarra
+    #64748b (tinta/500) al 62% y desenfoque, tal cual el archivo de Figma.
+  */
+  .panel-acceso {
+    background-color: color-mix(in srgb, var(--color-tinta-500) 62%, transparent);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+  }
+}
+
+/*
+  Menos movimiento: aquí solo el scroll. Las animaciones de componente se
+  desactivan en JS con `useReducedMotion`, en src/movimiento/.
+*/
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,44 @@
+import { CifraAnimada } from '@/movimiento'
+
+/** Tarjeta de saldo: una etiqueta, una cifra grande que cuenta y un detalle. */
+export function CuantoTienes({
+  tono,
+  etiqueta,
+  valor,
+  prefijo = '$ ',
+  detalle,
+}: {
+  /** `marca` va sobre el azul-pizarra; `superficie`, sobre blanco con borde. */
+  tono: 'marca' | 'superficie'
+  etiqueta: string
+  valor: number
+  prefijo?: string
+  detalle: string
+}) {
+  const esMarca = tono === 'marca'
+  return (
+    <div
+      className={`flex flex-col justify-between rounded-[var(--radius-extra)] p-6 ${
+        esMarca ? 'bg-accion-principal' : 'bg-fondo-superficie border border-borde-sutil'
+      }`}
+    >
+      <p
+        className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${
+          esMarca ? 'text-texto-sobre-marca/80' : 'text-texto-tenue'
+        }`}
+      >
+        {etiqueta}
+      </p>
+      <CifraAnimada
+        valor={valor}
+        prefijo={prefijo}
+        className={`mt-2 text-[44px] font-bold leading-none tabular-nums ${
+          esMarca ? 'text-texto-sobre-marca' : 'text-texto-principal'
+        }`}
+      />
+      <p className={`mt-2 text-[13px] ${esMarca ? 'text-texto-sobre-marca/80' : 'text-texto-tenue'}`}>
+        {detalle}
+      </p>
+    </div>
+  )
+}
