@@ -17,10 +17,26 @@ export const curva = {
   suave: [0.77, 0, 0.175, 1],
   /**
    * Rebote del punto de carga: una curva por tramo, no una sola para todo.
-   * Cae acelerando, sube frenando, y así hasta el tercer impacto. Son cinco
-   * tramos porque son seis keyframes de altura.
+   * Cae acelerando, sube frenando, y así hasta el tercer impacto. Son once
+   * tramos porque son doce keyframes de altura en `Cargador.tsx`: si añades o
+   * quitas uno allá, aquí tiene que haber uno menos que keyframes.
+   *
+   * El último tramo es `easeOut` a propósito: el derretimiento tiene que
+   * frenar, no golpear. Es lo contrario de un impacto.
    */
-  rebote: ['easeIn', 'easeOut', 'easeIn', 'easeOut', 'easeIn'],
+  rebote: [
+    'easeIn',
+    'easeIn',
+    'easeOut',
+    'easeOut',
+    'easeIn',
+    'easeIn',
+    'easeOut',
+    'easeOut',
+    'easeIn',
+    'easeIn',
+    'easeOut',
+  ],
 } as const
 
 /**
@@ -42,12 +58,16 @@ export const duracion = {
   crecimiento: 0.8,
   /** Cifra que cuenta desde cero hasta su valor. */
   conteo: 1.1,
-  /** Los tres botes del punto de carga, desde que cae hasta el último impacto. */
-  rebote: 1.15,
+  /**
+   * Los tres botes del punto de carga, desde que cae hasta que se derrite en el
+   * suelo. Va holgado a propósito: la deformación de la gota es el detalle que
+   * se mira, y a menos de esto pasa demasiado rápido para leerse.
+   */
+  rebote: 1.9,
   /** El punto que revienta y mancha la pantalla entera. */
-  mancha: 0.55,
+  mancha: 0.8,
   /** La mancha que se desvanece y descubre la web. */
-  descubierta: 0.45,
+  descubierta: 0.6,
   /**
    * Vuelta completa de los rosetones del fondo. Son minutos, no segundos: no
    * es una animación que se mire, es una deriva que impide que el fondo esté
