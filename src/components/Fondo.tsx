@@ -128,7 +128,14 @@ export function Fondo() {
         fill="none"
         stroke="color-mix(in srgb, var(--color-marca-900) 17%, transparent)"
         strokeWidth="0.5"
-        style={{ y: menosMovimiento ? undefined : yRoseton }}
+        style={{
+          y: menosMovimiento ? undefined : yRoseton,
+          // Sin esto la deriva cuesta 50 veces más CPU: al rotar, el navegador
+          // vuelve a rasterizar las 72 elipses en cada fotograma. Promovido a
+          // capa propia se rasteriza una vez y el compositor solo gira la
+          // textura. Es permanente porque la animación también lo es.
+          willChange: menosMovimiento ? undefined : 'transform',
+        }}
         animate={menosMovimiento ? undefined : { rotate: 360 }}
         transition={{ duration: duracion.derivaFondo, repeat: Infinity, ease: 'linear' }}
       >
@@ -143,7 +150,10 @@ export function Fondo() {
         fill="none"
         stroke="color-mix(in srgb, var(--color-marca-900) 15%, transparent)"
         strokeWidth="0.6"
-        style={{ y: menosMovimiento ? undefined : yRosetonChico }}
+        style={{
+          y: menosMovimiento ? undefined : yRosetonChico,
+          willChange: menosMovimiento ? undefined : 'transform',
+        }}
         animate={menosMovimiento ? undefined : { rotate: -360 }}
         transition={{ duration: duracion.derivaFondoLenta, repeat: Infinity, ease: 'linear' }}
       >

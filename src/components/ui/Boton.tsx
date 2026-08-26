@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
 import { curva, duracion } from '@/movimiento'
 
-type Variante = 'principal' | 'secundario' | 'sutil'
+type Variante = 'principal' | 'destacado' | 'secundario' | 'sutil'
 type Tamano = 'mediano' | 'grande'
 
 type BotonProps = {
@@ -15,12 +15,27 @@ type BotonProps = {
   to?: string
 } & ComponentProps<'button'>
 
+/*
+  El radio vive en cada variante, no en las clases base: `destacado` necesita
+  una forma distinta de la píldora, y dos utilidades `rounded-*` en el mismo
+  className compiten por orden en la hoja compilada, no por orden en el string.
+*/
 const variantes: Record<Variante, string> = {
   principal:
-    'bg-accion-principal text-texto-sobre-marca hover:bg-accion-principal-encima shadow-[0_10px_30px_-12px_color-mix(in_srgb,var(--color-lavanda-900)_60%,transparent)]',
+    'rounded-[var(--radius-nav)] bg-accion-principal text-texto-sobre-marca hover:bg-accion-principal-encima shadow-[0_10px_30px_-12px_color-mix(in_srgb,var(--color-lavanda-900)_60%,transparent)]',
+  /*
+    Llamada a la acción principal de la landing. Existe como variante propia
+    porque el botón de la barra de navegación usa `principal` y va a /login:
+    si los dos se ven igual, el visitante nuevo no distingue cuál es el suyo.
+    Relleno lavanda-900 —el color más saturado de la paleta, extraído de la
+    misma fotografía— y sombra en tinta, porque una sombra lavanda sobre un
+    fondo lavanda no se ve.
+  */
+  destacado:
+    'rounded-[var(--radius-grande)] bg-lavanda-900 text-texto-inverso hover:bg-lavanda-950 shadow-[0_14px_34px_-12px_color-mix(in_srgb,var(--color-tinta-900)_45%,transparent)]',
   secundario:
-    'bg-fondo-superficie text-texto-principal border border-borde-normal hover:bg-fondo-sutil',
-  sutil: 'bg-transparent text-texto-principal hover:bg-fondo-sutil',
+    'rounded-[var(--radius-nav)] bg-fondo-superficie text-texto-principal border border-borde-normal hover:bg-fondo-sutil',
+  sutil: 'rounded-[var(--radius-nav)] bg-transparent text-texto-principal hover:bg-fondo-sutil',
 }
 
 const tamanos: Record<Tamano, string> = {
@@ -44,7 +59,12 @@ export function Boton({
   ...props
 }: BotonProps) {
   const menosMovimiento = useReducedMotion()
-  const clases = `inline-flex items-center justify-center gap-2 rounded-[var(--radius-nav)] font-cuerpo font-semibold whitespace-nowrap transition-colors ${variantes[variante]} ${tamanos[tamano]} ${className}`
+  // El anillo de foco va por fuera del botón (`outline-offset`), no encima: el
+  // relleno de las dos variantes llenas es demasiado oscuro para que se lea
+  // sobre él. `focus-visible` y no `focus`, para que no quede pegado tras un clic.
+  const foco =
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tinta-900'
+  const clases = `inline-flex items-center justify-center gap-2 font-cuerpo font-semibold whitespace-nowrap transition-colors ${foco} ${variantes[variante]} ${tamanos[tamano]} ${className}`
   const tap = menosMovimiento ? undefined : { scale: 0.97 }
   const transicion = { duration: duracion.toque, ease: curva.salida }
 

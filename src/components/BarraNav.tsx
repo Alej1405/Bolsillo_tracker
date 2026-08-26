@@ -2,9 +2,9 @@ import logo from '@/assets/logo.png'
 import { Boton } from '@/components/ui/Boton'
 
 const enlaces = [
-  { texto: '¿Qué es.?', destino: '#que-es' },
+  { texto: '¿Qué es?', destino: '#que-es' },
   { texto: 'Nosotros', destino: '#como-funciona' },
-  { texto: '¿Qué hace.?', destino: '#que-hace' },
+  { texto: '¿Qué hace?', destino: '#que-hace' },
   { texto: 'Contacto', destino: '#contacto' },
 ]
 

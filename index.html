@@ -9,6 +9,23 @@
       content="Bolsillo reúne lo que entra, lo que sale y lo que guardas en un solo lugar. Sin hojas de cálculo y sin adivinar a fin de mes."
     />
     <title>Bolsillo — Tu dinero, ordenado sin esfuerzo</title>
+
+    <!--
+      La fotografía del hero es el LCP. Sin esto el navegador no se entera de
+      que existe hasta que React monta el componente, o sea después de bajar y
+      ejecutar el bundle entero. Va aquí, antes que las fuentes, y por eso el
+      archivo vive en public/ con nombre fijo: un import de Vite llevaría hash.
+    -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/webp"
+      href="/hero-960.webp"
+      imagesrcset="/hero-480.webp 480w, /hero-960.webp 960w, /hero-1389.webp 1389w"
+      imagesizes="(max-width: 768px) 100vw, 1180px"
+      fetchpriority="high"
+    />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

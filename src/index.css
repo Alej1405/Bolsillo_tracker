@@ -77,11 +77,29 @@
   --font-titulo: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-cuerpo: "Inter", ui-sans-serif, system-ui, sans-serif;
 
+  /* ── Escala tipográfica ──
+    Los tamaños que ya estaban repartidos en px sueltos por los componentes,
+    recogidos en una escala con nombre. El hero ya la usa; el resto de
+     secciones sigue en `text-[Npx]` y se migra sección por sección. */
+  --text-nota: 13px;
+  --text-cuerpo: 15px;
+  --text-cuerpo-amplio: 17px;
+  --text-rotulo: 20px;
+  --text-titulo-menor: 22px;
+  --text-titulo: 26px;
+  --text-titulo-mayor: 30px;
+  --text-portada: 36px;
+  /* Tamaños de despliegue: solo para el titular del hero. La escala se quedaba
+     en 36px, que es también el h2 de la sección siguiente — el titular de la
+     página no puede empatar con el de la sección que viene debajo. */
+  --text-despliegue: 40px;
+  --text-despliegue-mayor: 64px;
+
   /* ── Radios ── */
   --radius-pequeno: 6px;
   --radius-medio: 10px;
   --radius-grande: 14px;
-  --radius-extra: 20px;
+  --radius-extra: 14px;
   --radius-maximo: 28px;
   --radius-nav:25px;
 
@@ -123,7 +141,7 @@
     producción y el desenfoque se pierde donde no valga el alias de WebKit.
   */
   .vidrio-secundario {
-    background-color: color-mix(in srgb, #ffffff 0.5%, transparent);
+    background-color: color-mix(in srgb, #ffffff 1%, transparent);
     backdrop-filter: blur(8.5px);
     box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 5%, transparent);
   }

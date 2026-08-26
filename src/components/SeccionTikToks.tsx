@@ -1,5 +1,4 @@
 import { PlayIcon } from '@phosphor-icons/react'
-import hero from '@/assets/hero.jpg'
 import { Revelar } from '@/movimiento'
 
 // Tres espacios listos para incrustar los videos de TikTok desde el código.
@@ -27,7 +26,9 @@ export function SeccionTikToks() {
                 data-video-tiktok={i + 1}
               >
                 <img
-                  src={hero}
+                  src="/hero-480.webp"
+                  loading="lazy"
+                  decoding="async"
                   alt=""
                   className="absolute inset-0 size-full object-cover"
                   style={{ objectPosition: `${posicion * 100}% 40%` }}

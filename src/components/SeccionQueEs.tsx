@@ -1,4 +1,3 @@
-import hero from '@/assets/hero.jpg'
 import { Revelar } from '@/movimiento'
 import { FilaMovimiento } from '@/components/piezas'
 
@@ -9,11 +8,21 @@ export function SeccionQueEs() {
         {/* Fila 1: titular sobre foto + celda de dato */}
         <div className="grid gap-6 lg:grid-cols-[1.65fr_1fr]">
           <Revelar className="h-full">
-            <div className="relative flex h-full min-h-85 flex-col justify-end overflow-hidden rounded-extra[var(--radius-extra)] p-10">
-              <img src={hero} alt="" className="absolute inset-0 size-full object-cover" />
+            <div className="relative flex h-full min-h-85 flex-col justify-end overflow-hidden rounded-(--radius-extra) p-10">
+              <img
+                src="/hero-960.webp"
+                srcSet="/hero-480.webp 480w, /hero-960.webp 960w"
+                sizes="(max-width: 1024px) 100vw, 730px"
+                loading="lazy"
+                decoding="async"
+                alt=""
+                className="absolute inset-0 size-full object-cover"
+              />
               <div className="absolute inset-0 bg-lavanda-950/60" />
               <div className="relative">
-                <h2 className="max-w-[440px] font-titulo text-[36px] font-bold leading-tight text-texto-inverso">
+                {/* text-titulo-mayor y no 36px: este h2 empataba con el h1 del
+                    hero en escritorio y lo superaba en móvil. */}
+                <h2 className="max-w-[440px] font-titulo text-titulo-mayor font-bold leading-tight text-texto-inverso">
                   Tu dinero, ordenado sin esfuerzo
                 </h2>
                 <p className="mt-4 max-w-[400px] text-[17px] text-texto-inverso/85">

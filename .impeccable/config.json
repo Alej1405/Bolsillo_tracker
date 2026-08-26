@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-08-26T20:32:10.938Z",
+        "reason": "Tipografia del UI Kit del proyecto, documentada en src/index.css: los tokens salen del archivo de Figma 'Proyecto RDA'. Preexistente a esta pasada; no la eligio el modelo."
+      },
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "createdAt": "2026-08-26T20:32:11.654Z",
+        "reason": "Tipografia del UI Kit del proyecto, documentada en src/index.css: los tokens salen del archivo de Figma 'Proyecto RDA'. Preexistente a esta pasada; no la eligio el modelo."
+      }
+    ]
+  }
+}

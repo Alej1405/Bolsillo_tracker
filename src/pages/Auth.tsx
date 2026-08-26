@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import hero from '@/assets/hero.jpg'
 import logo from '@/assets/logo.png'
 import { Boton } from '@/components/ui/Boton'
 import { curva, duracion } from '@/movimiento'
@@ -134,7 +133,15 @@ export function Auth() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Fondo: la misma fotografía del hero con velo pizarra */}
-      <img src={hero} alt="" className="absolute inset-0 size-full object-cover" />
+      <img
+        src="/hero-1389.webp"
+        srcSet="/hero-480.webp 480w, /hero-960.webp 960w, /hero-1389.webp 1389w"
+        sizes="100vw"
+        fetchPriority="high"
+        decoding="async"
+        alt=""
+        className="absolute inset-0 size-full object-cover"
+      />
       <div className="absolute inset-0 bg-[rgba(71,85,105,0.35)]" />
 
       {/* Volver a la landing */}
