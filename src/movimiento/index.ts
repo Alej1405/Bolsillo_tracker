@@ -6,6 +6,7 @@
     useAparicion.ts  aparición al montar, para lo que ya está en pantalla
     CifraAnimada.tsx cifra que cuenta al entrar en vista
     BarraAnimada.tsx barras que crecen al entrar en vista
+    Cargador.tsx     pantalla de carga: el punto que rebota y mancha
 
   Los componentes importan de '@/movimiento', no de los archivos sueltos.
 */
@@ -14,3 +15,4 @@ export { Revelar } from '@/movimiento/Revelar'
 export { useAparicion } from '@/movimiento/useAparicion'
 export { CifraAnimada } from '@/movimiento/CifraAnimada'
 export { BarraVertical, BarraHorizontal } from '@/movimiento/BarraAnimada'
+export { Cargador } from '@/movimiento/Cargador'

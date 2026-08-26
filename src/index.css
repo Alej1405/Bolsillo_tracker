@@ -83,6 +83,7 @@
   --radius-grande: 14px;
   --radius-extra: 20px;
   --radius-maximo: 28px;
+  --radius-nav:25px;
 
   /* ── Curvas de easing. Espejo de `curva` en movimiento/curvas.ts:
      si cambias una, cambia la otra. ── */
@@ -115,19 +116,27 @@
     Vidrio esmerilado: relleno translúcido, borde interior de 1px,
     desenfoque de fondo y sombra tintada en lavanda (nunca negra).
     Es el material que unifica toda la landing sobre la fotografía.
+
+    Sin `-webkit-backdrop-filter`: Lightning CSS ya añade el prefijo al
+    compilar. Escribirlo a mano hace que colapse el par y deje SOLO la versión
+    prefijada, así que el `backdrop-filter` estándar desaparece del build de
+    producción y el desenfoque se pierde donde no valga el alias de WebKit.
   */
+  .vidrio-secundario {
+    background-color: color-mix(in srgb, #ffffff 0.5%, transparent);
+    backdrop-filter: blur(8.5px);
+    box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 5%, transparent);
+  }
   .vidrio {
     background-color: color-mix(in srgb, #ffffff 1%, transparent);
     backdrop-filter: blur(8.5px);
-    -webkit-backdrop-filter: blur(10px);
-    /* box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 30%, transparent); */
+    box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 30%, transparent);
   }
 
   .vidrio-oscuro {
     background-color: color-mix(in srgb, var(--color-lavanda-950) 88%, transparent);
     border: 1px solid color-mix(in srgb, #ffffff 16%, transparent);
     backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
     box-shadow: 0 28px 70px -20px color-mix(in srgb, var(--color-lavanda-950) 45%, transparent);
   }
 
@@ -139,7 +148,6 @@
   .panel-acceso {
     background-color: color-mix(in srgb, var(--color-tinta-500) 62%, transparent);
     backdrop-filter: blur(9px);
-    -webkit-backdrop-filter: blur(9px);
   }
 }
 

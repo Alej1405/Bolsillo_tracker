@@ -92,6 +92,45 @@ nunca negra** — una sombra negra sobre lavanda se ve sucia.
 }
 ```
 
+### El fondo: papel de valores
+
+El fondo no es decoración, es el material del que está hecho el dinero. Un **guilloché**
+—el grabado de líneas entrelazadas que llevan los billetes, los cheques y los certificados
+de acciones desde el siglo XIX— sobre el rayado de un **libro de contabilidad**.
+
+Se eligió por lo que significa: el guilloché existe porque es difícil de falsificar, así
+que su vocabulario es precisión, valor y trabajo que no se improvisa. Reemplazó a cinco
+orbes de color con `blur(190px)`, que es el fondo de una aplicación de bienestar, no el
+de una de finanzas. También se descartó la trama de cuadrícula con resplandor que usa hoy
+cualquier producto de software: aquella se lee genérica, esta pertenece al rubro.
+
+Vive entero en [`src/components/Fondo.tsx`](src/components/Fondo.tsx), en tres capas:
+
+| Capa | Qué es | Cómo está hecha |
+|---|---|---|
+| **Lienzo** | Degradado vertical en **azul-pizarra** (escala `marca`), de `#f7f9fb` a `#c9d4e2` | `linear-gradient` a 175° |
+| **Retícula** | Papel de libro mayor: línea fina cada 32 px, línea de registro cada 128 px | Cuatro `linear-gradient` de 1 px, con máscara radial para que la trama no llegue a un canto duro |
+| **Rosetones** | Dos guilloches, uno arriba a la derecha y otro cortado por el borde inferior izquierdo | Elipses concéntricas giradas en SVG: `72` y `54` pasos, trazo de `0.5 px` |
+
+Los rosetones están descentrados y salidos del marco a propósito, como en un billete real.
+
+#### Por qué el fondo no es lavanda
+
+El lavanda es el color de la **fotografía del hero**. Cuando el fondo también era lavanda,
+la foto no destacaba: la página entera era una sola mancha violeta y el lavanda terminaba
+siendo el único color que tenía. El fondo se pasó a **azul-pizarra** —la escala `marca`—
+para que la foto contraste contra él, azul frío contra violeta. Los dos son fríos, así que
+armonizan; son de matiz distinto, así que se separan. El lavanda queda donde debe estar:
+como acento, no como protagonista.
+
+El tono más oscuro del lienzo no es libre. Sobre el fondo va texto directo en
+`--color-texto-secundario` (`#475569`), y por debajo de `tinta-300` ese texto baja de
+4.5:1 y deja de cumplir AA. El degradado llega justo hasta ese límite y no más — medido
+en el navegador da **5.05:1** en el punto más oscuro.
+
+Ninguna capa usa desenfoque: el fondo anterior pintaba cinco `blur(190px)` de 500 px cada
+uno, que es de lo más caro que se le puede pedir a la GPU. Este dibuja líneas.
+
 ### Tipografía
 
 | Rol | Fuente | Uso |
@@ -112,7 +151,8 @@ src/movimiento/
 ├── Revelar.tsx        revela un bloque al entrar en vista      ← el scroll
 ├── useAparicion.ts    aparición al montar (portada)
 ├── CifraAnimada.tsx   cifra que cuenta al entrar en vista
-└── BarraAnimada.tsx   barras que crecen al entrar en vista
+├── BarraAnimada.tsx   barras que crecen al entrar en vista
+└── Cargador.tsx       pantalla de carga: el punto que rebota y mancha
 ```
 
 La curva por defecto es un **ease-out fuerte** — `cubic-bezier(0.23, 1, 0.32, 1)` — que
@@ -128,11 +168,25 @@ termina de contar antes de que la leas.
 | `vista.pieza` | 50 % | Barras y filas de un gráfico |
 | `vista.cifra` | 60 % | Cifras que cuentan |
 
+
+El fondo se mueve aparte, y por una razón: es `fixed`, así que sin movimiento propio la
+página entera se deslizaría sobre una lámina muerta. Lleva dos capas de movimiento que
+nunca se notan por separado:
+
+| | Qué hace | Por qué |
+|---|---|---|
+| **Paralaje** | Cada capa se desplaza con el scroll a distinta velocidad — la retícula `70 px`, los rosetones `260` y `160` | La diferencia de velocidad es lo que se lee como profundidad |
+| **Deriva** | Los rosetones giran una vuelta cada `260 s` y `340 s`, **en sentidos opuestos** | Demasiado lento para verse como animación, pero las líneas finas al cruzarse hacen un moiré que cambia siempre: el fondo nunca está dos veces igual |
+
+Los dos períodos son distintos a propósito. Si giraran al mismo ritmo, el moiré se
+repetiría y el fondo volvería a ser una lámina.
+
 ### Accesibilidad
 
 Todos los componentes de movimiento respetan `prefers-reduced-motion`. Con la preferencia
 activa el contenido se muestra estático y **ya visible**: la visibilidad nunca queda
-condicionada a que una animación llegue a correr.
+condicionada a que una animación llegue a correr. El fondo queda quieto —sin deriva ni
+paralaje— y la pantalla de carga no llega a aparecer.
 
 ---
 
@@ -216,6 +270,7 @@ npm run dev
 | Cambiar colores, tipografías o radios | El bloque `@theme` de `src/index.css` |
 | Añadir una sección a la landing | Un `Seccion*.tsx` nuevo, montado en `pages/Landing.tsx` |
 | Suavizar el scroll de los anclas | `scroll-behavior` en `src/index.css` |
+| Tocar el fondo: densidad, deriva o paralaje | `src/components/Fondo.tsx` — los períodos de giro salen de `curvas.ts` |
 
 ---
 

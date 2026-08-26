@@ -15,6 +15,12 @@ export const curva = {
   salida: [0.23, 1, 0.32, 1],
   /** Ease-in-out simétrico, para movimientos que van y vuelven. */
   suave: [0.77, 0, 0.175, 1],
+  /**
+   * Rebote del punto de carga: una curva por tramo, no una sola para todo.
+   * Cae acelerando, sube frenando, y así hasta el tercer impacto. Son cinco
+   * tramos porque son seis keyframes de altura.
+   */
+  rebote: ['easeIn', 'easeOut', 'easeIn', 'easeOut', 'easeIn'],
 } as const
 
 /**
@@ -36,6 +42,20 @@ export const duracion = {
   crecimiento: 0.8,
   /** Cifra que cuenta desde cero hasta su valor. */
   conteo: 1.1,
+  /** Los tres botes del punto de carga, desde que cae hasta el último impacto. */
+  rebote: 1.15,
+  /** El punto que revienta y mancha la pantalla entera. */
+  mancha: 0.55,
+  /** La mancha que se desvanece y descubre la web. */
+  descubierta: 0.45,
+  /**
+   * Vuelta completa de los rosetones del fondo. Son minutos, no segundos: no
+   * es una animación que se mire, es una deriva que impide que el fondo esté
+   * dos veces igual. Los dos valores son distintos a propósito — si giraran
+   * al mismo ritmo el moiré se repetiría.
+   */
+  derivaFondo: 260,
+  derivaFondoLenta: 340,
 } as const
 
 /**

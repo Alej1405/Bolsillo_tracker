@@ -44,7 +44,7 @@ export function Boton({
   ...props
 }: BotonProps) {
   const menosMovimiento = useReducedMotion()
-  const clases = `inline-flex items-center justify-center gap-2 rounded-[var(--radius-grande)] font-cuerpo font-semibold whitespace-nowrap transition-colors ${variantes[variante]} ${tamanos[tamano]} ${className}`
+  const clases = `inline-flex items-center justify-center gap-2 rounded-[var(--radius-nav)] font-cuerpo font-semibold whitespace-nowrap transition-colors ${variantes[variante]} ${tamanos[tamano]} ${className}`
   const tap = menosMovimiento ? undefined : { scale: 0.97 }
   const transicion = { duration: duracion.toque, ease: curva.salida }
 
