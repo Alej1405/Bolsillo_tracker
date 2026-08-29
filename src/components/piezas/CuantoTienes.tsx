@@ -18,12 +18,12 @@ export function CuantoTienes({
   const esMarca = tono === 'marca'
   return (
     <div
-      className={`flex flex-col justify-between rounded-[var(--radius-extra)] p-6 ${
+      className={`flex flex-col justify-between rounded-extra p-6 ${
         esMarca ? 'bg-accion-principal' : 'bg-fondo-superficie border border-borde-sutil'
       }`}
     >
       <p
-        className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${
+        className={`text-micro font-semibold uppercase tracking-[0.08em] ${
           esMarca ? 'text-texto-sobre-marca/80' : 'text-texto-tenue'
         }`}
       >
@@ -32,11 +32,11 @@ export function CuantoTienes({
       <CifraAnimada
         valor={valor}
         prefijo={prefijo}
-        className={`mt-2 text-[44px] font-bold leading-none tabular-nums ${
+        className={`mt-2 text-cifra font-bold leading-none tabular-nums ${
           esMarca ? 'text-texto-sobre-marca' : 'text-texto-principal'
         }`}
       />
-      <p className={`mt-2 text-[13px] ${esMarca ? 'text-texto-sobre-marca/80' : 'text-texto-tenue'}`}>
+      <p className={`mt-2 text-nota ${esMarca ? 'text-texto-sobre-marca/80' : 'text-texto-tenue'}`}>
         {detalle}
       </p>
     </div>

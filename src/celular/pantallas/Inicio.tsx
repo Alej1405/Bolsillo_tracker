@@ -16,7 +16,7 @@ export function Inicio() {
     <main className="min-h-screen px-5 pt-10 pb-[calc(58px+env(safe-area-inset-bottom)+2.5rem)]">
       <motion.div {...aparece(0.04)} className="flex items-center gap-1">
         <img src={logo} alt="" className="h-8 w-5.5 object-contain" />
-        <span className="font-titulo text-[22px] font-bold tracking-[0.045em] text-marca-800">
+        <span className="font-titulo text-titulo-menor font-bold tracking-[0.045em] text-marca-800">
           olsillo
         </span>
       </motion.div>
@@ -39,7 +39,7 @@ export function Inicio() {
       {/* El producto, no una foto: es lo primero que se ve al bajar la vista */}
       <motion.div
         {...aparece(0.28)}
-        className="vidrio mt-8 flex flex-col gap-2 rounded-[var(--radius-extra)] p-3"
+        className="vidrio mt-8 flex flex-col gap-2 rounded-extra p-3"
       >
         {movimientos.map((m) => (
           <FilaMovimiento

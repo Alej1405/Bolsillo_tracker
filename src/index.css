@@ -78,22 +78,41 @@
   --font-cuerpo: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   /* ── Escala tipográfica ──
-    Los tamaños que ya estaban repartidos en px sueltos por los componentes,
-    recogidos en una escala con nombre. El hero ya la usa; el resto de
-     secciones sigue en `text-[Npx]` y se migra sección por sección. */
+    Todos los tamaños que usa la interfaz, cada uno con su nombre. Ningún
+    componente escribe ya `text-[Npx]`: si un tamaño no está en esta lista,
+    no existe. Ordenada de menor a mayor para que se lea como escala.
+
+    Los escalones de 1px (13/14/15/16/17) son deuda heredada de cuando los
+    tamaños se escribían sueltos por componente. Están aquí para no mover ni
+    un píxel al tokenizar; cuando toque afinar la tipografía, esta zona es
+    la que hay que colapsar. */
+  --text-diminuto: 10px;
+  --text-micro: 11px;
+  --text-leyenda: 12px;
   --text-nota: 13px;
+  --text-nota-mayor: 14px;
   --text-cuerpo: 15px;
+  --text-cuerpo-medio: 16px;
   --text-cuerpo-amplio: 17px;
   --text-rotulo: 20px;
   --text-titulo-menor: 22px;
+  --text-titulo-medio: 24px;
   --text-titulo: 26px;
   --text-titulo-mayor: 30px;
+  --text-portada-menor: 32px;
   --text-portada: 36px;
   /* Tamaños de despliegue: solo para el titular del hero. La escala se quedaba
      en 36px, que es también el h2 de la sección siguiente — el titular de la
      página no puede empatar con el de la sección que viene debajo. */
   --text-despliegue: 40px;
+  /* Cifras: el saldo y los números que la pantalla muestra como dato duro. */
+  --text-cifra: 44px;
+  --text-cifra-mayor: 48px;
   --text-despliegue-mayor: 64px;
+
+  /* ── Medidas de la landing ── */
+  --container-landing: 1180px;
+  --spacing-aire-seccion: 130px;
 
   /* ── Radios ── */
   --radius-pequeno: 6px;
@@ -101,7 +120,7 @@
   --radius-grande: 14px;
   --radius-extra: 14px;
   --radius-maximo: 28px;
-  --radius-nav:25px;
+  --radius-nav: 25px;
 
   /* ── Curvas de easing. Espejo de `curva` en movimiento/curvas.ts:
      si cambias una, cambia la otra. ── */
@@ -130,6 +149,27 @@
 }
 
 @layer components {
+  /*
+    Caja de contenido de la landing. Son dos clases porque son dos elementos:
+    `.seccion` pone el aire lateral en el <section> y `.contenedor` centra la
+    caja de adentro. Antes estaban copiadas a mano en los 7 componentes.
+
+    El respiro vertical NO va aquí a propósito: cada sección respira distinto
+    (el hero abre con pt-28, el pie cierra con pb-10 pt-16), así que el `py`
+    se queda en el componente.
+
+    Con @apply, que es la excepción y no la regla: escribir las media queries
+    a mano obligaría a repetir los breakpoints de Tailwind (48rem / 64rem) y
+    quedarían desincronizados el día que cambien.
+  */
+  .seccion {
+    @apply px-4 md:px-8 lg:px-aire-seccion;
+  }
+
+  .contenedor {
+    @apply mx-auto max-w-landing;
+  }
+
   /*
     Vidrio esmerilado: relleno translúcido, borde interior de 1px,
     desenfoque de fondo y sombra tintada en lavanda (nunca negra).

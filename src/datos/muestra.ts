@@ -1,4 +1,4 @@
-import type { Bolsillo, Movimiento, Paso, Saldo } from '@/datos/tipos'
+import type { Asunto, Bolsillo, Canal, Movimiento, Paso, Saldo } from '@/datos/tipos'
 
 /*
   Datos de muestra de la landing. Son los mismos que ya se veían repartidos por
@@ -68,4 +68,46 @@ export const pasos: Paso[] = [
     cuerpo:
       'La aplicación arma el reparto por categoría, el mes a mes y lo que te queda disponible. Tú solo lees.',
   },
+]
+
+/*
+  Canales de contacto. Provisionales: los reemplaza la respuesta del backend.
+  El `valor` viaja ya formateado y el `enlace` ya resuelto — la vista no arma
+  ni un `mailto:` ni le pone formato a un teléfono.
+*/
+export const canales: Canal[] = [
+  {
+    id: 'can-correo',
+    clase: 'correo',
+    etiqueta: 'Escríbenos',
+    valor: 'hola@bolsillo.ec',
+    enlace: 'mailto:hola@bolsillo.ec',
+  },
+  {
+    id: 'can-telefono',
+    clase: 'telefono',
+    etiqueta: 'Llámanos',
+    valor: '+593 99 123 4567',
+    enlace: 'tel:+593991234567',
+  },
+  {
+    id: 'can-ubicacion',
+    clase: 'ubicacion',
+    etiqueta: 'Dónde estamos',
+    valor: 'Quito, Ecuador',
+  },
+  {
+    id: 'can-horario',
+    clase: 'horario',
+    etiqueta: 'Cuándo respondemos',
+    valor: 'Lunes a viernes, 9:00 a 18:00',
+  },
+]
+
+/* Opciones del campo "asunto". También las mandará el backend. */
+export const asuntos: Asunto[] = [
+  { id: 'asu-ayuda', texto: 'Necesito ayuda con mi cuenta' },
+  { id: 'asu-error', texto: 'Encontré un error' },
+  { id: 'asu-idea', texto: 'Tengo una idea para la aplicación' },
+  { id: 'asu-otro', texto: 'Otro asunto' },
 ]

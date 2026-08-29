@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
-import { Boton } from '@/components/ui/Boton'
+import { BotonIr } from '@/components/ui/BotonIr'
 import { FilaMovimiento } from '@/components/piezas'
-import { useAparicion } from '@/movimiento'
+import { useAcuse, useAparicion } from '@/movimiento'
 
 /**
  * Portada de la landing. Es lo único que se anima al cargar y no al hacer
@@ -19,11 +19,12 @@ import { useAparicion } from '@/movimiento'
  * index.html pueda nombrarla sin el hash que Vite le pondría al compilar.
  */
 export function Hero() {
+  const { yendo, ir } = useAcuse('/registro')
   const aparece = useAparicion()
 
   return (
-    <section id="inicio" className="px-4 pt-28 md:px-8 lg:px-[130px]">
-      <div className="mx-auto grid max-w-[1180px] overflow-hidden rounded-[var(--radius-maximo)] lg:grid-cols-[1fr_0.92fr]">
+    <section id="inicio" className="seccion pt-28">
+      <div className="contenedor grid overflow-hidden rounded-maximo lg:grid-cols-[1fr_0.92fr]">
         {/* Columna del argumento */}
         <div className="vidrio flex flex-col justify-center px-7 py-12 md:px-12 md:py-20">
           <motion.h1
@@ -42,9 +43,9 @@ export function Hero() {
           </motion.p>
 
           <motion.div {...aparece(0.22)} className="mt-10 flex flex-col items-start gap-3">
-            <Boton to="/registro" variante="destacado">
+            <BotonIr yendo={yendo} onClick={ir} variante="destacado">
               Crear cuenta gratis
-            </Boton>
+            </BotonIr>
             <p className="text-nota text-texto-tenue">Gratis · sin tarjeta de crédito</p>
           </motion.div>
         </div>
@@ -70,7 +71,7 @@ export function Hero() {
 
           <motion.div
             {...aparece(0.3)}
-            className="vidrio relative w-full max-w-[340px] rounded-[var(--radius-extra)] p-4"
+            className="vidrio relative w-full max-w-[340px] rounded-extra p-4"
           >
             <div className="flex flex-col gap-2">
               <FilaMovimiento

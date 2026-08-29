@@ -20,7 +20,7 @@ export function Miralo() {
           {videos.map((posicion, i) => (
             <div
               key={i}
-              className="relative aspect-[9/16] w-[230px] shrink-0 snap-center overflow-hidden rounded-[var(--radius-extra)] border border-white/60"
+              className="relative aspect-[9/16] w-[230px] shrink-0 snap-center overflow-hidden rounded-extra border border-white/60"
               data-video-tiktok={i + 1}
             >
               <img
@@ -48,7 +48,7 @@ export function Miralo() {
             Empezar toma tres minutos
           </h2>
 
-          <ol className="vidrio mt-5 flex flex-col rounded-[var(--radius-extra)] px-5">
+          <ol className="vidrio mt-5 flex flex-col rounded-extra px-5">
             {pasos.map((p, i) => (
               <li
                 key={p.titulo}

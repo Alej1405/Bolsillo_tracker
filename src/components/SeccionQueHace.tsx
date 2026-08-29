@@ -9,20 +9,20 @@ import {
 
 export function SeccionQueHace() {
   return (
-    <section id="que-hace" className="px-4 py-24 md:px-8 lg:px-[130px]">
-      <div className="mx-auto flex max-w-[1180px] flex-col items-center gap-10">
+    <section id="que-hace" className="seccion py-24">
+      <div className="contenedor flex flex-col items-center gap-10">
         <Revelar className="text-center">
-          <h2 className="font-titulo text-[36px] font-bold text-texto-principal">
+          <h2 className="font-titulo text-portada font-bold text-texto-principal">
             Las cuentas ya salen hechas
           </h2>
-          <p className="mx-auto mt-3 max-w-[620px] text-[17px] text-texto-secundario">
+          <p className="mx-auto mt-3 max-w-[620px] text-cuerpo-amplio text-texto-secundario">
             Tú registras. Bolsillo suma, reparte y compara. Cada número que ves aquí lo calcula la
             aplicación, no tú.
           </p>
         </Revelar>
 
         <Revelar retraso={0.1} className="w-full">
-          <div className="vidrio flex flex-col gap-6 rounded-[var(--radius-maximo)] p-8">
+          <div className="vidrio flex flex-col gap-6 rounded-maximo p-8">
             {/* Fila superior: dos gráficos + saldos */}
             <div className="grid gap-5 lg:grid-cols-[1fr_1.2fr_1fr]">
               <GraficoEntroSalio />

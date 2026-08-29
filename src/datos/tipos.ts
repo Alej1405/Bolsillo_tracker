@@ -45,3 +45,23 @@ export type Paso = {
   titulo: string
   cuerpo: string
 }
+
+export type ClaseCanal = 'correo' | 'telefono' | 'ubicacion' | 'horario'
+
+export type Canal = {
+  id: string
+  /** Decide el icono. La vista mapea clase → icono; el backend no sabe de iconos. */
+  clase: ClaseCanal
+  /** Rótulo del canal, p. ej. "Escríbenos". */
+  etiqueta: string
+  /** El dato ya escrito como debe leerse. El backend decide cómo se formatea
+   *  un teléfono o un horario — aquí no se arma la cadena. */
+  valor: string
+  /** href listo para usar (mailto:, tel:, maps). Sin esto, el canal no es enlace. */
+  enlace?: string
+}
+
+export type Asunto = {
+  id: string
+  texto: string
+}

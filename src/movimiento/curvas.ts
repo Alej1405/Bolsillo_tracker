@@ -16,26 +16,29 @@ export const curva = {
   /** Ease-in-out simétrico, para movimientos que van y vuelven. */
   suave: [0.77, 0, 0.175, 1],
   /**
-   * Rebote del punto de carga: una curva por tramo, no una sola para todo.
-   * Cae acelerando, sube frenando, y así hasta el tercer impacto. Son once
-   * tramos porque son doce keyframes de altura en `Cargador.tsx`: si añades o
-   * quitas uno allá, aquí tiene que haber uno menos que keyframes.
+   * Vuelo de la moneda del cargador: una curva por tramo, no una sola para
+   * todo. Es gravedad, y la gravedad no tiene una sola curva — subiendo frena
+   * (`easeOut`) y cayendo acelera (`easeIn`).
    *
-   * El último tramo es `easeOut` a propósito: el derretimiento tiene que
-   * frenar, no golpear. Es lo contrario de un impacto.
+   * Son doce tramos porque son trece keyframes de altura en `Cargador.tsx`:
+   * si añades o quitas uno allá, aquí tiene que haber uno menos que keyframes.
+   *
+   * Los tres primeros son la subida tras el lanzamiento, cada vez más lenta
+   * hasta el ápice; de ahí al suelo, tres de caída. El resto son los botes.
    */
-  rebote: [
-    'easeIn',
-    'easeIn',
+  vuelo: [
     'easeOut',
-    'easeOut',
-    'easeIn',
-    'easeIn',
     'easeOut',
     'easeOut',
     'easeIn',
     'easeIn',
+    'easeIn',
     'easeOut',
+    'easeIn',
+    'easeOut',
+    'easeIn',
+    'easeOut',
+    'easeIn',
   ],
 } as const
 
@@ -59,12 +62,29 @@ export const duracion = {
   /** Cifra que cuenta desde cero hasta su valor. */
   conteo: 1.1,
   /**
-   * Los tres botes del punto de carga, desde que cae hasta que se derrite en el
-   * suelo. Va holgado a propósito: la deformación de la gota es el detalle que
-   * se mira, y a menos de esto pasa demasiado rápido para leerse.
+   * Acuse de un botón que navega: lo que el botón se queda cambiando de color
+   * con la flecha en marcha antes de cambiar de pantalla.
+   *
+   * La navegación es instantánea —es una SPA, no hay nada que esperar—, así
+   * que esta espera es del todo perceptual: sin ella el clic no deja rastro y
+   * la pantalla nueva aparece sin que nada acuse recibo. Corta a propósito:
+   * pasado un cuarto de segundo deja de leerse como respuesta y empieza a
+   * leerse como lentitud.
    */
-  rebote: 1.9,
-  /** El punto que revienta y mancha la pantalla entera. */
+  acuse: 0.34,
+  /**
+   * El mensaje que se dobla, entra en el sobre y sale despachado. Es una
+   * secuencia de tres actos, y necesita aire: por debajo de esto la hoja y la
+   * solapa se pisan y no se entiende qué pasó.
+   */
+  despacho: 1.6,
+  /**
+   * El lanzamiento de la moneda: desde que sale disparada hasta que se asienta
+   * tras el tercer bote. Va holgado a propósito — el giro en el aire es el
+   * detalle que se mira, y a menos de esto las vueltas se vuelven un borrón.
+   */
+  vuelo: 2.1,
+  /** La moneda que revienta y mancha la pantalla entera. */
   mancha: 0.8,
   /** La mancha que se desvanece y descubre la web. */
   descubierta: 0.6,

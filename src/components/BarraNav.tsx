@@ -14,7 +14,7 @@ export function BarraNav() {
       <nav className=" vidrio-secundario  pointer-events-auto flex h-16 w-full max-w-300 items-center justify-between rounded-full pl-6 pr-4 ">
         <a href="#inicio" className="flex items-center gap-1" aria-label="Bolsillo, inicio">
           <img src={logo} alt="" className="h-8 w-5.5 object-contain" />
-          <span className="font-titulo text-[22px] font-bold tracking-[0.045em] text-marca-800">
+          <span className="font-titulo text-titulo-menor font-bold tracking-[0.045em] text-marca-800">
             olsillo
           </span>
         </a>
@@ -24,7 +24,7 @@ export function BarraNav() {
             <li key={e.destino}>
               <a
                 href={e.destino}
-                className="text-[15px] font-medium text-texto-secundario transition-colors hover:text-texto-principal"
+                className="text-cuerpo font-medium text-texto-secundario transition-colors hover:text-texto-principal"
               >
                 {e.texto}
               </a>
@@ -32,7 +32,12 @@ export function BarraNav() {
           ))}
         </ul>
 
-        <Boton to="/login" tamano="mediano" className="h-9 px-4 text-[14px] font-light">
+        {/*
+          `h-11` y no `h-9`: 44px es el mínimo táctil, y esta barra se usa con
+          el dedo en tableta. El aspecto compacto lo da el `px` y el peso de la
+          fuente, no recortarle altura al único botón de la barra.
+        */}
+        <Boton to="/login" tamano="mediano" className="h-11 px-4 text-nota-mayor font-light">
           Ingresar
         </Boton>
       </nav>

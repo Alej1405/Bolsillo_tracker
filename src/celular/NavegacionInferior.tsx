@@ -49,7 +49,7 @@ export function NavegacionInferior() {
               {({ isActive }) => (
                 <>
                   <Icono size={23} weight={isActive ? 'fill' : 'regular'} />
-                  <span className={`text-[11px] ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                  <span className={`text-micro ${isActive ? 'font-semibold' : 'font-medium'}`}>
                     {etiqueta}
                   </span>
                 </>

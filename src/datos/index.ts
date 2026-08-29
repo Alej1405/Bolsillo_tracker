@@ -8,7 +8,7 @@
   `muestra.ts` se reemplace por un cliente HTTP, no habrá que tocar ni un
   import en las pantallas.
 */
-export { movimientos, bolsillos, saldos, pasos } from '@/datos/muestra'
+export { movimientos, bolsillos, saldos, pasos, canales, asuntos } from '@/datos/muestra'
 export type {
   Movimiento,
   ClaseMovimiento,
@@ -16,4 +16,7 @@ export type {
   ClaseBolsillo,
   Saldo,
   Paso,
+  Canal,
+  ClaseCanal,
+  Asunto,
 } from '@/datos/tipos'

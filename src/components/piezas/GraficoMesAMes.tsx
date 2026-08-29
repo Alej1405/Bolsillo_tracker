@@ -25,10 +25,10 @@ const escalonadoBarra = 0.04
 /** Los doce meses del año, con un par de barras (entró / salió) por mes. */
 export function GraficoMesAMes() {
   return (
-    <div className="rounded-[var(--radius-extra)] bg-fondo-superficie p-6">
-      <p className="text-[20px] font-semibold text-texto-principal">Mes a mes</p>
-      <p className="text-[13px] text-texto-tenue">Los doce meses del año. Los meses sin datos se muestran en cero</p>
-      <div className="mt-4 flex items-center gap-4 text-[12px] text-texto-secundario">
+    <div className="rounded-extra bg-fondo-superficie p-6">
+      <p className="text-rotulo font-semibold text-texto-principal">Mes a mes</p>
+      <p className="text-nota text-texto-tenue">Los doce meses del año. Los meses sin datos se muestran en cero</p>
+      <div className="mt-4 flex items-center gap-4 text-leyenda text-texto-secundario">
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-ingreso" /> Entró
         </span>
@@ -53,7 +53,7 @@ export function GraficoMesAMes() {
                 retraso={i * escalonadoBarra + 0.02}
               />
             </div>
-            <span className="text-[10px] text-texto-tenue">{m}</span>
+            <span className="text-diminuto text-texto-tenue">{m}</span>
           </div>
         ))}
       </div>

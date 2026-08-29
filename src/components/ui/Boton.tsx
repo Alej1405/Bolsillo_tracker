@@ -22,7 +22,7 @@ type BotonProps = {
 */
 const variantes: Record<Variante, string> = {
   principal:
-    'rounded-[var(--radius-nav)] bg-accion-principal text-texto-sobre-marca hover:bg-accion-principal-encima shadow-[0_10px_30px_-12px_color-mix(in_srgb,var(--color-lavanda-900)_60%,transparent)]',
+    'rounded-nav bg-accion-principal text-texto-sobre-marca hover:bg-accion-principal-encima shadow-[0_10px_30px_-12px_color-mix(in_srgb,var(--color-lavanda-900)_60%,transparent)]',
   /*
     Llamada a la acción principal de la landing. Existe como variante propia
     porque el botón de la barra de navegación usa `principal` y va a /login:
@@ -32,15 +32,15 @@ const variantes: Record<Variante, string> = {
     fondo lavanda no se ve.
   */
   destacado:
-    'rounded-[var(--radius-grande)] bg-lavanda-900 text-texto-inverso hover:bg-lavanda-950 shadow-[0_14px_34px_-12px_color-mix(in_srgb,var(--color-tinta-900)_45%,transparent)]',
+    'rounded-grande bg-lavanda-900 text-texto-inverso hover:bg-lavanda-950 shadow-[0_14px_34px_-12px_color-mix(in_srgb,var(--color-tinta-900)_45%,transparent)]',
   secundario:
-    'rounded-[var(--radius-nav)] bg-fondo-superficie text-texto-principal border border-borde-normal hover:bg-fondo-sutil',
-  sutil: 'rounded-[var(--radius-nav)] bg-transparent text-texto-principal hover:bg-fondo-sutil',
+    'rounded-nav bg-fondo-superficie text-texto-principal border border-borde-normal hover:bg-fondo-sutil',
+  sutil: 'rounded-nav bg-transparent text-texto-principal hover:bg-fondo-sutil',
 }
 
 const tamanos: Record<Tamano, string> = {
-  mediano: 'h-11 px-5 text-[15px]',
-  grande: 'h-[52px] px-7 text-[16px]',
+  mediano: 'h-11 px-5 text-cuerpo',
+  grande: 'h-[52px] px-7 text-cuerpo-medio',
 }
 
 const MotionLink = motion.create(Link)

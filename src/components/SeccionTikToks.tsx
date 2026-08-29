@@ -6,14 +6,14 @@ const videos = [0.3, 0.5, 0.7]
 
 export function SeccionTikToks() {
   return (
-    <section id="tiktoks" className="px-4 py-24 md:px-8 lg:px-[130px]">
-      <div className="mx-auto flex max-w-[1180px] flex-col items-center gap-10">
+    <section id="tiktoks" className="seccion py-24">
+      <div className="contenedor flex flex-col items-center gap-10">
         <Revelar className="text-center">
-          <h2 className="font-titulo text-[36px] font-bold text-texto-principal">
-            Míralo funcionando
+          <h2 className="font-titulo text-portada font-bold text-texto-principal">
+            Nuestros Usuarios.
           </h2>
-          <p className="mt-3 text-[17px] text-texto-secundario">
-            Un minuto por video. Sin manual, sin curso.
+          <p className="mt-3 text-cuerpo-amplio text-texto-secundario">
+            La muestra que algo simple puede mejorar tu economía.
           </p>
         </Revelar>
 
@@ -22,7 +22,7 @@ export function SeccionTikToks() {
             <Revelar key={i} retraso={i * 0.1}>
               {/* Marcador para incrustar el video de TikTok N */}
               <div
-                className="relative aspect-[9/16] w-[280px] overflow-hidden rounded-[var(--radius-extra)] border border-white/60 shadow-[0_26px_60px_-20px_color-mix(in_srgb,var(--color-lavanda-900)_45%,transparent)]"
+                className="relative aspect-[9/16] w-[280px] overflow-hidden rounded-extra  shadow-[0_26px_60px_-20px_color-mix(in_srgb,var(--color-lavanda-900)_45%,transparent)]"
                 data-video-tiktok={i + 1}
               >
                 <img

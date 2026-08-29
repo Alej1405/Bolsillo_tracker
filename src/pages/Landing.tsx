@@ -6,6 +6,7 @@ import { SeccionQueHace } from '@/components/SeccionQueHace'
 import { SeccionBolsillos } from '@/components/SeccionBolsillos'
 import { SeccionComoFunciona } from '@/components/SeccionComoFunciona'
 import { SeccionTikToks } from '@/components/SeccionTikToks'
+import { SeccionContacto } from '@/components/SeccionContacto'
 import { SeccionRegistro } from '@/components/SeccionRegistro'
 import { PieDePagina } from '@/components/PieDePagina'
 
@@ -23,6 +24,7 @@ export function Landing() {
         <SeccionBolsillos />
         <SeccionComoFunciona />
         <SeccionTikToks />
+        <SeccionContacto />
         <SeccionRegistro />
       </main>
 

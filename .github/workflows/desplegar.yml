@@ -65,11 +65,25 @@ jobs:
         run: npm run lint
 
       - name: Compilar
+        env:
+          # Vite sustituye las VITE_* en tiempo de compilación, no las lee al
+          # ejecutarse: si no está aquí, el sitio se publica con `undefined`
+          # dentro y no hay forma de arreglarlo sin volver a compilar.
+          #
+          # No es un secreto —acaba dentro del bundle, que es público— así que
+          # va escrita y no en Secrets. El `.env` local no sirve: está en
+          # .gitignore y el runner nunca lo ve.
+          VITE_API_URL: https://finance.srv1666598.hstgr.cloud/api/v1
         run: npm run build
 
       - name: Comprobar que el build sirve
         run: |
           test -f dist/index.html || { echo "::error::El build no generó index.html"; exit 1; }
+          # Que compile no basta: sin VITE_API_URL el build pasa igual y el
+          # sitio muere en blanco al cargar. Se comprueba que la URL quedó
+          # dentro del bundle.
+          grep -rq "finance.srv1666598.hstgr.cloud" dist/assets/*.js \
+            || { echo "::error::El bundle no lleva la URL de la API: ¿falta VITE_API_URL?"; exit 1; }
           echo "Peso del sitio: $(du -sh dist | cut -f1)"
 
       - name: Guardar el resultado

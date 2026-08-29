@@ -25,7 +25,7 @@ export function SeccionQueEs() {
                 <h2 className="max-w-[440px] font-titulo text-titulo-mayor font-bold leading-tight text-texto-inverso">
                   Tu dinero, ordenado sin esfuerzo
                 </h2>
-                <p className="mt-4 max-w-[400px] text-[17px] text-texto-inverso/85">
+                <p className="mt-4 max-w-[400px] text-cuerpo-amplio text-texto-inverso/85">
                   Lo que entra, lo que sale y lo que guardas, en un solo lugar.
                 </p>
               </div>
@@ -33,18 +33,18 @@ export function SeccionQueEs() {
           </Revelar>
 
           <Revelar retraso={0.08} className="h-full">
-            <div className="vidrio-oscuro flex h-full min-h-[340px] flex-col justify-between rounded-[var(--radius-extra)] p-9">
+            <div className="vidrio-oscuro flex h-full min-h-[340px] flex-col justify-between rounded-extra p-9">
               <div>
-                <p className="font-cuerpo text-[44px] font-bold leading-none text-texto-inverso">2</p>
-                <p className="mt-2 text-[15px] font-medium text-texto-inverso/85">
+                <p className="font-cuerpo text-cifra font-bold leading-none text-texto-inverso">2</p>
+                <p className="mt-2 text-cuerpo font-medium text-texto-inverso/85">
                   toques para registrar un gasto
                 </p>
               </div>
               <div>
-                <p className="font-titulo text-[20px] font-semibold text-texto-inverso">
+                <p className="font-titulo text-rotulo font-semibold text-texto-inverso">
                   Sin hojas de cálculo. Sin adivinar a fin de mes.
                 </p>
-                <p className="mt-2 text-[15px] text-texto-inverso/85">
+                <p className="mt-2 text-cuerpo text-texto-inverso/85">
                   Registrar un movimiento toma dos toques: categoría y bolsillo.
                 </p>
               </div>
@@ -55,11 +55,11 @@ export function SeccionQueEs() {
         {/* Fila 2: demostración ancha + columna de dos celdas */}
         <div className="grid gap-6 lg:grid-cols-[1.65fr_1fr]">
           <Revelar>
-            <div className="vidrio flex flex-col gap-5 rounded-[var(--radius-extra)] p-9">
-              <h3 className="font-titulo text-[20px] font-semibold text-texto-principal">
+            <div className="vidrio flex flex-col gap-5 rounded-extra p-9">
+              <h3 className="font-titulo text-rotulo font-semibold text-texto-principal">
                 Registra en segundos
               </h3>
-              <p className="text-[15px] text-texto-secundario">
+              <p className="text-cuerpo text-texto-secundario">
                 Anota un gasto o un ingreso sin salir de la pantalla principal. Cada movimiento queda
                 con su categoría y su bolsillo.
               </p>
@@ -84,21 +84,21 @@ export function SeccionQueEs() {
 
           <div className="flex flex-col gap-6">
             <Revelar retraso={0.06} className="flex-1">
-              <div className="vidrio flex h-full flex-col justify-center rounded-[var(--radius-extra)] p-7">
-                <h3 className="font-titulo text-[17px] font-semibold text-texto-principal">
+              <div className="vidrio flex h-full flex-col justify-center rounded-extra p-7">
+                <h3 className="font-titulo text-cuerpo-amplio font-semibold text-texto-principal">
                   Mira a dónde se va
                 </h3>
-                <p className="mt-2 text-[13px] text-texto-secundario">
+                <p className="mt-2 text-nota text-texto-secundario">
                   Reparto por categoría y comparación mes a mes, ya calculados.
                 </p>
               </div>
             </Revelar>
             <Revelar retraso={0.12} className="flex-1">
-              <div className="vidrio flex h-full flex-col justify-center rounded-[var(--radius-extra)] p-7">
-                <h3 className="font-titulo text-[17px] font-semibold text-texto-principal">
+              <div className="vidrio flex h-full flex-col justify-center rounded-extra p-7">
+                <h3 className="font-titulo text-cuerpo-amplio font-semibold text-texto-principal">
                   Cuida tus ahorros
                 </h3>
-                <p className="mt-2 text-[13px] text-texto-secundario">
+                <p className="mt-2 text-nota text-texto-secundario">
                   Cada bolsillo aparte, para saber qué puedes gastar de verdad.
                 </p>
               </div>

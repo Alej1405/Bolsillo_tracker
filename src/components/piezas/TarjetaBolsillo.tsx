@@ -22,16 +22,16 @@ export function TarjetaBolsillo({
 }) {
   const b = bolsillos[clase]
   return (
-    <div className="flex items-center gap-3 rounded-[var(--radius-grande)] bg-fondo-superficie px-4 py-3.5">
-      <span className={`grid size-9 shrink-0 place-items-center rounded-full text-[14px] font-semibold ${b.color}`}>
+    <div className="flex items-center gap-3 rounded-grande bg-fondo-superficie px-4 py-3.5">
+      <span className={`grid size-9 shrink-0 place-items-center rounded-full text-nota-mayor font-semibold ${b.color}`}>
         {b.inicial}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-medium text-texto-principal">{nombre}</p>
-        <p className="truncate text-[13px] text-texto-tenue">{clase}</p>
+        <p className="truncate text-cuerpo font-medium text-texto-principal">{nombre}</p>
+        <p className="truncate text-nota text-texto-tenue">{clase}</p>
       </div>
       <span
-        className={`text-[15px] font-semibold tabular-nums ${negativo ? 'text-gasto' : 'text-texto-principal'}`}
+        className={`text-cuerpo font-semibold tabular-nums ${negativo ? 'text-gasto' : 'text-texto-principal'}`}
       >
         {monto}
       </span>

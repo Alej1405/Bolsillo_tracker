@@ -8,6 +8,7 @@ import { Inicio } from '@/celular/pantallas/Inicio'
 import { QueHace } from '@/celular/pantallas/QueHace'
 import { Miralo } from '@/celular/pantallas/Miralo'
 import { Empezar } from '@/celular/pantallas/Empezar'
+import { Acceso } from '@/celular/pantallas/Acceso'
 
 /**
  * Al cambiar de pantalla la vista vuelve arriba. Sin esto, entrar a "Míralo"
@@ -26,7 +27,7 @@ function useVolverArriba() {
  * La experiencia de celular. No es la landing maquetada de otro modo: tiene
  * sus propias pantallas, su propia navegación al pie y su propio recorrido.
  *
- * Lleva `Cargador` igual que escritorio: la gota que rebota y se derrite es la
+ * Lleva `Cargador` igual que escritorio: la moneda que gira y revienta es la
  * marca del producto, y el arranque es donde se presenta. Va fuera de `Routes`
  * a propósito, para que se vea una vez al entrar y no en cada cambio de
  * pestaña — un splash que se repite deja de ser marca y pasa a ser estorbo.
@@ -44,9 +45,9 @@ export function AppCelular() {
         <Route path="/que-hace" element={<QueHace />} />
         <Route path="/miralo" element={<Miralo />} />
         <Route path="/empezar" element={<Empezar />} />
-        {/* Acceso y registro todavía no tienen versión de celular */}
-        <Route path="/registro" element={<EnConstruccion />} />
-        <Route path="/login" element={<EnConstruccion />} />
+        <Route path="/registro" element={<Acceso />} />
+        <Route path="/login" element={<Acceso />} />
+        <Route path="/en-construccion" element={<EnConstruccion />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 

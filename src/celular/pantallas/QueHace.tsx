@@ -46,7 +46,7 @@ export function QueHace() {
             aparte y te dice cuánto tienes disponible de verdad.
           </p>
 
-          <div className="vidrio mt-5 flex flex-col gap-2.5 rounded-[var(--radius-extra)] p-3">
+          <div className="vidrio mt-5 flex flex-col gap-2.5 rounded-extra p-3">
             {bolsillos.map((b) => (
               <TarjetaBolsillo
                 key={b.id}
