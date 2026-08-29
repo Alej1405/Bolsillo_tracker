@@ -92,6 +92,10 @@
   --text-nota: 13px;
   --text-nota-mayor: 14px;
   --text-cuerpo: 15px;
+  /* 16px es el suelo de los campos de formulario, no una preferencia: por
+     debajo de eso iOS Safari hace zoom solo al enfocar un input, y ese zoom
+     desplaza el viewport, descoloca lo que esté en `fixed` y no se deshace al
+     salir del campo. Si bajas este valor, revisa antes qué campos lo usan. */
   --text-cuerpo-medio: 16px;
   --text-cuerpo-amplio: 17px;
   --text-rotulo: 20px;

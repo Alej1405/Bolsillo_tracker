@@ -1,13 +1,11 @@
 /*
-  Acceso: los formularios de entrar y de crear cuenta.
+  Formularios de entrar y de crear cuenta.
 
-  Viven aquí y no dentro de una pantalla porque los usan dos: la de escritorio
-  (`pages/Auth.tsx`, con el panel que se desliza) y la de celular
-  (`celular/pantallas/Acceso.tsx`, apilada). La lógica —validación, llamada a
-  la API, aviso de éxito— es la misma; lo único que cambia es el envoltorio.
+  Los usan dos pantallas —`pages/Auth.tsx` en escritorio y
+  `celular/pantallas/Acceso.tsx` en móvil— con la misma lógica y distinto
+  envoltorio.
 */
 export { Campo } from '@/acceso/Campo'
+export { RutaProtegida } from '@/acceso/RutaProtegida'
 export { FormularioLogin } from '@/acceso/FormularioLogin'
 export { FormularioRegistro } from '@/acceso/FormularioRegistro'
-export { LIMITES, REQUISITOS, claveCompleta, validarRegistro } from '@/acceso/reglas'
-export type { CamposRegistro, ErroresRegistro } from '@/acceso/reglas'

@@ -1,39 +1,24 @@
-/*
-  Reglas del formulario de acceso, compartidas por escritorio y celular.
-
-  Están fuera de las pantallas porque las dos las necesitan iguales: si una
-  validara distinto que la otra, el mismo usuario vería un error en el teléfono
-  que no ve en el portátil.
-*/
+import { CLAVE, LoginSchema, RegistroSchema } from '@/utils/auth-schema'
+import type { DatosLogin, DatosRegistro } from '@/types'
 
 /*
-  Validación espejo de `UserCreate`, el esquema que publica el backend en
-  /openapi.json. Los límites están copiados de ahí: si allá cambian, aquí
-  también, o el formulario dejará pasar lo que el servidor rechaza.
+  Reglas de los formularios de acceso, compartidas por escritorio y celular.
 
-  No es la autoridad — el backend revalida todo y su 422 manda. Esto solo
-  ahorra el viaje y le dice al usuario qué pasa antes de esperar la respuesta.
+  La validación sale de los mismos schemas que validan la petición, así el
+  formulario no puede exigir algo distinto de lo que la API acepta.
 */
-export const LIMITES = {
-  nombre: { min: 2, max: 120 },
-  clave: { min: 8, max: 72 },
-} as const
 
-/*
-  Los tres requisitos de la contraseña, cada uno con la comprobación que le
-  toca. Salen del validador `_validar_password` del backend (schemas/user.py)
-  más el `min_length` de UserCreate — son los mismos, escritos aparte para
-  poder mostrarlos uno por uno mientras el usuario escribe.
+export type Errores<T> = Partial<Record<keyof T, string>>
 
-  El máximo de 72 no está en la lista a propósito: nadie escribe una clave de
-  73 caracteres por accidente, y un requisito que siempre se cumple es ruido.
-  Ese sí se avisa como error, y solo si llega a pasar.
-*/
+export const VACIO_REGISTRO: DatosRegistro = { full_name: '', email: '', password: '' }
+export const VACIO_LOGIN: DatosLogin = { email: '', password: '' }
+
+/** Los tres requisitos de la contraseña, para marcarlos mientras se escribe. */
 export const REQUISITOS = [
   {
     id: 'largo',
-    texto: `Al menos ${LIMITES.clave.min} caracteres`,
-    cumple: (clave: string) => clave.length >= LIMITES.clave.min,
+    texto: `Al menos ${CLAVE.min} caracteres`,
+    cumple: (clave: string) => clave.length >= CLAVE.min,
   },
   { id: 'letra', texto: 'Al menos una letra', cumple: (clave: string) => /[a-zA-Z]/.test(clave) },
   { id: 'numero', texto: 'Al menos un número', cumple: (clave: string) => /\d/.test(clave) },
@@ -41,42 +26,44 @@ export const REQUISITOS = [
 
 export const claveCompleta = (clave: string) => REQUISITOS.every((r) => r.cumple(clave))
 
-export type CamposRegistro = { full_name: string; email: string; password: string }
-export type ErroresRegistro = Partial<Record<keyof CamposRegistro, string>>
-
-export function validarRegistro(datos: CamposRegistro): ErroresRegistro {
-  const errores: ErroresRegistro = {}
-
-  const nombre = datos.full_name.trim()
-  if (nombre.length < LIMITES.nombre.min) errores.full_name = 'Escribe tu nombre completo.'
-  else if (nombre.length > LIMITES.nombre.max)
-    errores.full_name = `Máximo ${LIMITES.nombre.max} caracteres.`
-
-  // Comprobación mínima: algo, arroba, algo, punto, algo. El backend usa
-  // EmailStr, que es más estricto; no se replica aquí para no rechazar
-  // correos válidos que el servidor sí aceptaría.
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.email))
-    errores.email = 'Ese correo no parece completo.'
-
-  /*
-    De la contraseña solo se avisa el máximo. Los tres requisitos se muestran
-    en su propia lista debajo del campo, que se marca sola mientras se escribe:
-    repetirlos aquí como error rojo diría dos veces lo mismo.
-  */
-  if (datos.password.length > LIMITES.clave.max)
-    errores.password = `Máximo ${LIMITES.clave.max} caracteres.`
-
+/** Primer fallo de Zod por campo. Más de uno a la vez satura. */
+function primerFalloPorCampo<T extends object>(
+  issues: { path: PropertyKey[]; message: string }[],
+): Errores<T> {
+  const errores: Errores<T> = {}
+  for (const fallo of issues) {
+    const campo = fallo.path[0] as keyof T | undefined
+    if (campo && !errores[campo]) errores[campo] = fallo.message
+  }
   return errores
 }
 
-export const VACIO: CamposRegistro = { full_name: '', email: '', password: '' }
+/**
+ * Valida el registro. La contraseña se excluye: sus requisitos ya se muestran
+ * en su propia lista bajo el campo. El envío se bloquea con `claveCompleta`.
+ */
+export function validarRegistro(datos: DatosRegistro): Errores<DatosRegistro> {
+  const r = RegistroSchema.safeParse(datos)
+  if (r.success) return {}
+  const { password: _clave, ...resto } = primerFalloPorCampo<DatosRegistro>(r.error.issues)
+  return resto
+}
+
+export function validarLogin(datos: DatosLogin): Errores<DatosLogin> {
+  const r = LoginSchema.safeParse(datos)
+  return r.success ? {} : primerFalloPorCampo<DatosLogin>(r.error.issues)
+}
+
+/** Nombres de campo del backend → campos del formulario, para mapear su 400. */
+export const CAMPOS: Record<string, keyof DatosRegistro> = {
+  full_name: 'full_name',
+  email: 'email',
+  password: 'password',
+}
 
 /**
- * El correo que el visitante escribió en la landing, si vino de ahí.
- *
- * Llega por el `state` de la navegación, no por la URL. Se comprueba el tipo
- * en vez de confiar: el `state` lo puede fabricar cualquiera desde la consola,
- * y un objeto ahí dentro reventaría el input al asignarlo como `value`.
+ * El correo que el visitante escribió en la landing, si vino de ahí. Llega por
+ * el `state` de la navegación, que cualquiera puede fabricar: se comprueba.
  */
 export function correoDeLaLanding(estado: unknown): string {
   if (estado && typeof estado === 'object' && 'correo' in estado) {
@@ -84,15 +71,4 @@ export function correoDeLaLanding(estado: unknown): string {
     if (typeof correo === 'string') return correo
   }
   return ''
-}
-
-/*
-  Nombres de campo del backend traducidos a los del formulario. Hoy coinciden,
-  pero el mapa existe para que un `details[].field` desconocido no se pierda en
-  silencio: lo que no esté aquí se muestra como aviso general.
-*/
-export const CAMPOS: Record<string, keyof CamposRegistro> = {
-  full_name: 'full_name',
-  email: 'email',
-  password: 'password',
 }

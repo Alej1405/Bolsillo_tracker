@@ -61,7 +61,7 @@ export function Campo({
           onChange={onCambio && ((e) => onCambio(e.target.value))}
           aria-invalid={error ? true : undefined}
           aria-describedby={`${id}-nota`}
-          className={`h-11 w-full rounded-medio border bg-fondo-superficie pl-4 text-cuerpo text-texto-principal outline-none placeholder:text-texto-tenue focus:ring-2 ${
+          className={`h-11 w-full rounded-medio border bg-fondo-superficie pl-4 text-cuerpo-medio text-texto-principal outline-none placeholder:text-texto-tenue focus:ring-2 ${
             esClave ? 'pr-12' : 'pr-4'
           } ${
             error

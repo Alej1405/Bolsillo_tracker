@@ -4,17 +4,18 @@ import { CheckCircleIcon, CircleIcon, EnvelopeSimpleIcon } from '@phosphor-icons
 import { Boton } from '@/components/ui/Boton'
 import { Modal } from '@/components/ui/Modal'
 import { Campo } from '@/acceso/Campo'
-import { registrar, ErrorApi, ErrorDeRed } from '@/api'
-import type { Usuario } from '@/api'
+import { ErrorApi, ErrorDeRed } from '@/services/api'
+import { useAppStore } from '@/stores/useAppStore'
+import type { DatosRegistro, Usuario } from '@/types'
 import {
   CAMPOS,
   REQUISITOS,
-  VACIO,
+  VACIO_REGISTRO,
   claveCompleta,
   correoDeLaLanding,
   validarRegistro,
 } from '@/acceso/reglas'
-import type { CamposRegistro, ErroresRegistro } from '@/acceso/reglas'
+import type { Errores } from '@/acceso/reglas'
 
 /**
  * Los requisitos de la contraseña, marcándose mientras se escribe.
@@ -57,19 +58,20 @@ function RequisitosClave({ clave, marcarFallos }: { clave: string; marcarFallos:
 export function FormularioRegistro() {
   const navegar = useNavigate()
   const { state } = useLocation()
+  const crearCuenta = useAppStore((e) => e.crearCuenta)
+  const enviando = useAppStore((e) => e.cargando)
   /*
     El correo de la landing es solo el valor inicial: a partir de ahí el campo
     es del usuario. Va en el inicializador de `useState` y no en un
     `useEffect`, para que no llegue un fotograma tarde ni pise lo que el
     usuario ya haya escrito si el componente se vuelve a renderizar.
   */
-  const [datos, setDatos] = useState<CamposRegistro>(() => ({
-    ...VACIO,
+  const [datos, setDatos] = useState<DatosRegistro>(() => ({
+    ...VACIO_REGISTRO,
     email: correoDeLaLanding(state),
   }))
-  const [errores, setErrores] = useState<ErroresRegistro>({})
+  const [errores, setErrores] = useState<Errores<DatosRegistro>>({})
   const [tocado, setTocado] = useState(false)
-  const [enviando, setEnviando] = useState(false)
   /** Fallo que no pertenece a ningún campo: correo repetido, red, 500. */
   const [aviso, setAviso] = useState<string | null>(null)
   /*
@@ -85,7 +87,7 @@ export function FormularioRegistro() {
     y eso regaña en vez de ayudar. Una vez enviado sí se revalida en cada
     tecla: ahí el rojo ya está puesto y lo útil es verlo desaparecer.
   */
-  const cambiar = (campo: keyof CamposRegistro) => (valor: string) => {
+  const cambiar = (campo: keyof DatosRegistro) => (valor: string) => {
     const siguiente = { ...datos, [campo]: valor }
     setDatos(siguiente)
     if (tocado) setErrores(validarRegistro(siguiente))
@@ -102,9 +104,8 @@ export function FormularioRegistro() {
     // `validarRegistro`, sino en la lista que el usuario tiene delante.
     if (Object.keys(fallos).length > 0 || !claveCompleta(datos.password)) return
 
-    setEnviando(true)
     try {
-      const { user } = await registrar({ ...datos, full_name: datos.full_name.trim() })
+      const user = await crearCuenta({ ...datos, full_name: datos.full_name.trim() })
       /*
         Se muestra el aviso en vez de navegar. `user` viene del 201 del
         backend, o sea con la fila ya confirmada en la base: si hubiera
@@ -122,7 +123,7 @@ export function FormularioRegistro() {
           exacto; el resto son avisos de formulario completo.
         */
         if (error.codigo === 'VALIDATION_ERROR' && error.campos.length > 0) {
-          const porCampo: ErroresRegistro = {}
+          const porCampo: Errores<DatosRegistro> = {}
           let sueltos = false
           for (const fallo of error.campos) {
             const campo = CAMPOS[fallo.field]
@@ -137,10 +138,6 @@ export function FormularioRegistro() {
       } else {
         setAviso('Algo salió mal. Inténtalo de nuevo.')
       }
-    } finally {
-      // En `finally` y no tras cada rama: si no, un fallo deja el botón
-      // bloqueado para siempre y el usuario no puede reintentar.
-      setEnviando(false)
     }
   }
 
@@ -148,7 +145,7 @@ export function FormularioRegistro() {
     <>
       <Modal
         abierto={creado !== null}
-        onCerrar={() => navegar('/en-construccion')}
+        onCerrar={() => navegar('/dashboard')}
         titulo="Tu cuenta está creada"
       >
         <div className="flex flex-col items-center text-center">
@@ -185,7 +182,7 @@ export function FormularioRegistro() {
             </span>
           </p>
 
-          <Boton onClick={() => navegar('/en-construccion')} className="mt-6 w-full">
+          <Boton onClick={() => navegar('/dashboard')} className="mt-6 w-full">
             Continuar
           </Boton>
         </div>

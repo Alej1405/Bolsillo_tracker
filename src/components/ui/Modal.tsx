@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { curva, duracion } from '@/movimiento'
 
@@ -18,6 +19,13 @@ type ModalProps = {
  * como diálogo, llevarse el foco al abrirse, devolverlo a donde estaba al
  * cerrarse, cerrarse con Escape y no dejar que la página de detrás haga
  * scroll.
+ *
+ * Se dibuja en un portal sobre `document.body`, no donde está escrito. Un
+ * `position: fixed` se ancla al viewport solo si ningún ancestro tiene
+ * `transform`, `filter`, `backdrop-filter` o `will-change`: cualquiera de esos
+ * crea un bloque contenedor y el diálogo se encierra dentro de él. Pasaba con
+ * el `backdrop-blur` de la tarjeta del formulario, que dejaba el popup metido
+ * en el ancho de la tarjeta en vez de cubrir la pantalla.
  */
 export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
   const menosMovimiento = useReducedMotion()
@@ -84,11 +92,20 @@ export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
     }
   }, [abierto, onCerrar])
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {abierto && (
         <motion.div
-          className="fixed inset-0 z-[90] grid place-items-center px-5"
+          /*
+            `dvh` y no `vh`: en un teléfono la barra del navegador aparece y
+            desaparece, y `100vh` mide siempre la ventana grande — el diálogo
+            queda centrado respecto a un alto que en ese momento no existe y
+            se va hacia abajo. `dvh` sigue al alto real.
+
+            El `py` deja aire arriba y abajo para que, con el teclado abierto,
+            el diálogo no quede pegado a los bordes.
+          */
+          className="fixed inset-0 z-[90] grid h-[100dvh] place-items-center overflow-y-auto px-5 py-6"
           initial={menosMovimiento ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -115,12 +132,19 @@ export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: duracion.panel, ease: curva.salida }}
-            className="relative w-full max-w-[440px] rounded-extra bg-fondo-superficie p-8 shadow-[0_24px_60px_-20px_color-mix(in_srgb,var(--color-tinta-950)_35%,transparent)]"
+            /*
+              `my-auto` con el padre en overflow: centra cuando cabe y deja
+              hacer scroll cuando no, en vez de recortar la parte de arriba —
+              que es lo que hace `place-items-center` a secas con contenido
+              más alto que la pantalla.
+            */
+            className="relative my-auto w-full max-w-[440px] rounded-extra bg-fondo-superficie p-6 shadow-[0_24px_60px_-20px_color-mix(in_srgb,var(--color-tinta-950)_35%,transparent)] sm:p-8"
           >
             {children}
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }

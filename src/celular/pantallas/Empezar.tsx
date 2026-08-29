@@ -49,7 +49,7 @@ export function Empezar() {
           placeholder="nombre@correo.com"
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
-          className="h-[52px] w-full rounded-grande bg-fondo-superficie px-4 text-cuerpo text-texto-principal outline-none placeholder:text-texto-tenue focus:ring-2 focus:ring-lavanda-400"
+          className="h-[52px] w-full rounded-grande bg-fondo-superficie px-4 text-cuerpo-medio text-texto-principal outline-none placeholder:text-texto-tenue focus:ring-2 focus:ring-lavanda-400"
         />
         <BotonIr type="submit" yendo={yendo} variante="destacado" className="w-full">
           Crear cuenta gratis

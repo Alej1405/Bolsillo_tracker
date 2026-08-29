@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { Cargador } from '@/movimiento'
 import { useTipoPantalla } from '@/pantalla'
+import { RutaProtegida } from '@/acceso'
 
 /*
   Cada rama se carga cuando hace falta, no toda de golpe al abrir la página.
@@ -25,6 +26,7 @@ const EnConstruccion = lazy(() =>
   import('@/pages/EnConstruccion').then((m) => ({ default: m.EnConstruccion })),
 )
 const AppCelular = lazy(() => import('@/celular').then((m) => ({ default: m.AppCelular })))
+const Dashboard = lazy(() => import('@/dash/Dashboard').then((m) => ({ default: m.Dashboard })))
 
 export function App() {
   const pantalla = useTipoPantalla()
@@ -51,6 +53,11 @@ export function App() {
           <Route path="/login" element={<Auth />} />
           <Route path="/registro" element={<Auth />} />
           <Route path="/en-construccion" element={<EnConstruccion />} />
+
+          {/* Todo lo que cuelgue de aquí exige sesión. */}
+          <Route element={<RutaProtegida />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
         </Routes>
       </Suspense>
     </>
