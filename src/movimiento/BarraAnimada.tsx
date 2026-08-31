@@ -13,6 +13,7 @@ export function BarraVertical({
   clase,
   ancho = 'w-16',
   retraso = 0,
+  animar = true,
 }: {
   /** Alto final en px. */
   alto: number
@@ -20,13 +21,15 @@ export function BarraVertical({
   clase: string
   ancho?: string
   retraso?: number
+  /** `false` la dibuja ya crecida. Lo usa el panel: ver `CifraAnimada`. */
+  animar?: boolean
 }) {
   const menosMovimiento = useReducedMotion()
   return (
     <motion.div
       className={`${ancho} rounded-t-lg ${clase}`}
       style={{ height: alto, transformOrigin: 'bottom' }}
-      initial={menosMovimiento ? false : { scaleY: 0 }}
+      initial={menosMovimiento || !animar ? false : { scaleY: 0 }}
       whileInView={{ scaleY: 1 }}
       viewport={vista.pieza}
       transition={{ duration: duracion.crecimiento, delay: retraso, ease: curva.salida }}
@@ -43,19 +46,22 @@ export function BarraHorizontal({
   porcentaje,
   color,
   retraso = 0,
+  animar = true,
 }: {
   porcentaje: number
   /** Color CSS del relleno, normalmente una variable `--color-grafico-N`. */
   color: string
   retraso?: number
+  /** `false` la dibuja ya crecida. Lo usa el panel: ver `CifraAnimada`. */
+  animar?: boolean
 }) {
   const menosMovimiento = useReducedMotion()
   return (
     <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-fondo-sutil">
       <motion.div
         className="h-full rounded-full"
-        style={{ backgroundColor: color }}
-        initial={menosMovimiento ? false : { width: 0 }}
+        style={{ backgroundColor: color, ...(animar ? null : { width: `${porcentaje}%` }) }}
+        initial={menosMovimiento || !animar ? false : { width: 0 }}
         whileInView={{ width: `${porcentaje}%` }}
         viewport={vista.pieza}
         transition={{ duration: duracion.crecimiento, delay: retraso, ease: curva.salida }}

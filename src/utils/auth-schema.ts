@@ -53,3 +53,33 @@ export const ErrorAPIResponseSchema = z.object({
       .default([]),
   }),
 })
+
+/** Lo que acepta el PATCH del perfil. El correo no se cambia. */
+export const ActualizarPerfilSchema = z.object({
+  full_name: z.string().trim().min(2, 'Mínimo 2 caracteres').max(120, 'Máximo 120 caracteres'),
+})
+
+/*
+  Cambio de contraseña. Exige la actual además de la nueva: sin eso, cualquiera
+  que encuentre la sesión abierta se queda con la cuenta.
+
+  El máximo de 72 no es capricho: bcrypt lanza a los 73 bytes.
+*/
+export const CambiarClaveSchema = z.object({
+  current_password: z.string().min(1, 'Escribe tu contraseña actual'),
+  new_password: z
+    .string()
+    .min(8, 'Mínimo 8 caracteres')
+    .max(72, 'Máximo 72 caracteres')
+    .regex(/[a-zA-Z]/, 'Necesita al menos una letra')
+    .regex(/\d/, 'Necesita al menos un número'),
+})
+
+/** Página de usuarios. Solo la ve `super_admin`. */
+export const ListaUsuariosAPIResponseSchema = z.object({
+  items: z.array(UsuarioAPIResponseSchema.extend({ is_active: z.boolean() })),
+  page: z.number(),
+  page_size: z.number(),
+  total: z.number(),
+  total_pages: z.number(),
+})

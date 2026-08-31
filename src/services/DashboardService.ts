@@ -16,7 +16,7 @@ import type { Dashboard } from '@/types'
  * en `false` y no hay que tocar ni el slice ni los componentes: el mock ya
  * tiene la forma exacta de la respuesta real, validada por el mismo schema.
  */
-const USAR_DATOS_FICTICIOS = true
+const USAR_DATOS_FICTICIOS = false
 
 /** Toda la pantalla principal en una petición: saldo, totales, cuentas y movimientos. */
 export async function obtenerDashboard(): Promise<Dashboard> {

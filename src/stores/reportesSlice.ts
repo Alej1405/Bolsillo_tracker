@@ -1,0 +1,70 @@
+import type { StateCreator } from 'zustand'
+import { obtenerAnual, obtenerReparto, obtenerResumen } from '@/services/ReportesService'
+import type { Anual, Reparto, Resumen } from '@/types'
+
+/*
+  Estado de los reportes.
+
+  Los tres se piden por separado porque responden a preguntas distintas y se
+  consultan en momentos distintos: el resumen es de un rango, el reparto es de
+  ese mismo rango por categoría, y la serie anual son doce meses. Cargarlos
+  juntos obligaría a pedir los tres cada vez que cambia un filtro.
+
+  Capturan el error en vez de dejarlo subir: los tres se piden solos al abrir
+  la pantalla, sin que nadie pulse nada.
+*/
+export type ReportesSliceType = {
+  resumen: Resumen | null
+  reparto: Reparto | null
+  anual: Anual | null
+  cargandoReportes: boolean
+  errorReportes: string | null
+
+  cargarResumen: (desde: string, hasta: string, cuentaId?: string) => Promise<void>
+  cargarReparto: (desde: string, hasta: string, tipo?: 'income' | 'expense') => Promise<void>
+  cargarAnual: (anio?: number) => Promise<void>
+}
+
+const mensaje = (e: unknown) =>
+  e instanceof Error ? e.message : 'No pudimos cargar el reporte.'
+
+export const createReportesSlice: StateCreator<ReportesSliceType> = (set) => ({
+  resumen: null,
+  reparto: null,
+  anual: null,
+  cargandoReportes: false,
+  errorReportes: null,
+
+  cargarResumen: async (desde, hasta, cuentaId) => {
+    set({ cargandoReportes: true, errorReportes: null })
+    try {
+      set({ resumen: await obtenerResumen(desde, hasta, cuentaId) })
+    } catch (e) {
+      set({ errorReportes: mensaje(e) })
+    } finally {
+      set({ cargandoReportes: false })
+    }
+  },
+
+  cargarReparto: async (desde, hasta, tipo = 'expense') => {
+    set({ cargandoReportes: true, errorReportes: null })
+    try {
+      set({ reparto: await obtenerReparto(desde, hasta, tipo) })
+    } catch (e) {
+      set({ errorReportes: mensaje(e) })
+    } finally {
+      set({ cargandoReportes: false })
+    }
+  },
+
+  cargarAnual: async (anio) => {
+    set({ cargandoReportes: true, errorReportes: null })
+    try {
+      set({ anual: await obtenerAnual(anio) })
+    } catch (e) {
+      set({ errorReportes: mensaje(e) })
+    } finally {
+      set({ cargandoReportes: false })
+    }
+  },
+})

@@ -43,8 +43,10 @@
   /* ── Semánticos ── */
   --color-fondo-lienzo: #f8fafc;
   --color-fondo-superficie: #ffffff;
+  --color-fondo-superficie-elevada: #ffffff;
   --color-fondo-sutil: #f1f5f9;
   --color-fondo-inverso: #0f172a;
+  --color-fondo-velo: #020617;
 
   --color-texto-principal: #0f172a;
   --color-texto-secundario: #475569;
@@ -55,9 +57,24 @@
 
   --color-borde-normal: #e2e8f0;
   --color-borde-sutil: #f1f5f9;
+  /* Para bordes que deben cumplir el 3:1 de WCAG 1.4.11: el de un control
+      con el que se interactúa. `borde-normal` da 1.24:1 sobre blanco y sirve
+     para separar, no para delimitar algo que se pulsa. */
+  --color-borde-fuerte: #cbd5e1;
+  --color-borde-foco: #57708b;
 
   --color-accion-principal: #57708b;
   --color-accion-principal-encima: #45596f;
+  --color-accion-principal-presionada: #3d4e64;
+  --color-accion-principal-sutil: #f1f5f9;
+  --color-accion-secundaria: #ffffff;
+  --color-accion-secundaria-encima: #f1f5f9;
+  --color-accion-inactiva: #e2e8f0;
+
+  --color-error: #be123c;
+  --color-error-sutil: #fff1f2;
+  --color-exito: #047857;
+  --color-exito-sutil: #ecfdf5;
 
   --color-ingreso: #15803d;
   --color-ingreso-sutil: #f0fdf4;
@@ -92,9 +109,10 @@
   --text-nota: 13px;
   --text-nota-mayor: 14px;
   --text-cuerpo: 15px;
+  --text-simple: font-light;
   /* 16px es el suelo de los campos de formulario, no una preferencia: por
-     debajo de eso iOS Safari hace zoom solo al enfocar un input, y ese zoom
-     desplaza el viewport, descoloca lo que esté en `fixed` y no se deshace al
+      debajo de eso iOS Safari hace zoom solo al enfocar un input, y ese zoom
+      desplaza el viewport, descoloca lo que esté en `fixed` y no se deshace al
      salir del campo. Si bajas este valor, revisa antes qué campos lo usan. */
   --text-cuerpo-medio: 16px;
   --text-cuerpo-amplio: 17px;
@@ -106,7 +124,7 @@
   --text-portada-menor: 32px;
   --text-portada: 36px;
   /* Tamaños de despliegue: solo para el titular del hero. La escala se quedaba
-     en 36px, que es también el h2 de la sección siguiente — el titular de la
+      en 36px, que es también el h2 de la sección siguiente — el titular de la
      página no puede empatar con el de la sección que viene debajo. */
   --text-despliegue: 40px;
   /* Cifras: el saldo y los números que la pantalla muestra como dato duro. */
@@ -122,7 +140,10 @@
   --radius-pequeno: 6px;
   --radius-medio: 10px;
   --radius-grande: 14px;
-  --radius-extra: 14px;
+  /* 20px, no 14: `extra` y `grande` estaban ambos en 14 y el sistema prometía
+      una distinción que no existía. En el UI Kit `radio/extra` es 20 — es el
+     radio de las tarjetas, un escalón por encima del de los controles. */
+  --radius-extra: 20px;
   --radius-maximo: 28px;
   --radius-nav: 25px;
 
@@ -184,10 +205,17 @@
     prefijada, así que el `backdrop-filter` estándar desaparece del build de
     producción y el desenfoque se pierde donde no valga el alias de WebKit.
   */
+  .vidrio-transparente {
+    isolation: isolate;
+    background: rgba(255, 255, 255, 0);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(1px);
+  }
+
   .vidrio-secundario {
     background-color: color-mix(in srgb, #ffffff 1%, transparent);
     backdrop-filter: blur(8.5px);
-    box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 5%, transparent);
+    box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 2%, transparent);
   }
   .vidrio {
     background-color: color-mix(in srgb, #ffffff 1%, transparent);

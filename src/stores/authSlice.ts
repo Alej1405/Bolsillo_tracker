@@ -1,6 +1,13 @@
 import type { StateCreator } from 'zustand'
 import { registrar, iniciarSesion, obtenerPerfil, cerrarSesion } from '@/services/AuthService'
-import type { DatosLogin, DatosRegistro, Usuario } from '@/types'
+import { actualizarPerfil, cambiarClave, darseDeBaja } from '@/services/UsuariosService'
+import type {
+  DatosActualizarPerfil,
+  DatosCambiarClave,
+  DatosLogin,
+  DatosRegistro,
+  Usuario,
+} from '@/types'
 
 /*
   Estado de la sesión: quién está dentro y si hay una petición en curso.
@@ -20,6 +27,17 @@ export type AuthSliceType = {
   cargarPerfil: () => Promise<void>
   salir: () => void
   descartarAviso: () => void
+
+  /*
+    La propia cuenta. Van aquí y no en un slice de `usuarios` porque operan
+    sobre `usuario`, que vive en este slice: separarlas obligaría a un slice a
+    escribir el estado de otro. Los endpoints de administración —listar y
+    borrar cuentas ajenas— sí tendrán el suyo cuando exista esa pantalla.
+  */
+  guardandoPerfil: boolean
+  cambiarNombre: (datos: DatosActualizarPerfil) => Promise<Usuario>
+  cambiarContrasena: (datos: DatosCambiarClave) => Promise<void>
+  darDeBajaMiCuenta: () => Promise<void>
 }
 
 export const createAuthSlice: StateCreator<AuthSliceType> = (set) => ({
@@ -60,4 +78,38 @@ export const createAuthSlice: StateCreator<AuthSliceType> = (set) => ({
   },
 
   descartarAviso: () => set({ reciénCreado: null }),
+
+  guardandoPerfil: false,
+
+  cambiarNombre: async (datos) => {
+    set({ guardandoPerfil: true })
+    try {
+      const usuario = await actualizarPerfil(datos)
+      set({ usuario })
+      return usuario
+    } finally {
+      set({ guardandoPerfil: false })
+    }
+  },
+
+  cambiarContrasena: async (datos) => {
+    set({ guardandoPerfil: true })
+    try {
+      await cambiarClave(datos)
+    } finally {
+      set({ guardandoPerfil: false })
+    }
+  },
+
+  /* Da de baja y cierra la sesión: la cuenta queda inactiva, no borrada. */
+  darDeBajaMiCuenta: async () => {
+    set({ guardandoPerfil: true })
+    try {
+      await darseDeBaja()
+      cerrarSesion()
+      set({ usuario: null })
+    } finally {
+      set({ guardandoPerfil: false })
+    }
+  },
 })

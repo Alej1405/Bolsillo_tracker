@@ -9,6 +9,17 @@ type CifraAnimadaProps = {
   sufijo?: string
   decimales?: number
   className?: string
+  /**
+   * `false` pinta el número directamente, sin contar y sin depender de que el
+   * elemento entre en vista.
+   *
+   * Es lo que usa el panel: contar es un gesto de portada —premia el scroll y
+   * celebra una cifra de vitrina—, pero ahí dentro el saldo es el dato que la
+   * persona vino a leer, y retrasarlo un segundo no lo hace mejor. Además el
+   * disparador es `useInView`, que en una pantalla que ya está a la vista al
+   * montar puede no llegar a dispararse nunca y dejar el número en cero.
+   */
+  animar?: boolean
 }
 
 /** Formatea con separadores de miles "." y decimales "," (es-EC). */
@@ -34,6 +45,7 @@ export function CifraAnimada({
   sufijo = '',
   decimales = 2,
   className,
+  animar = true,
 }: CifraAnimadaProps) {
   const ref = useRef<HTMLSpanElement>(null)
   const enVista = useInView(ref, vista.cifra)
@@ -42,6 +54,7 @@ export function CifraAnimada({
   const texto = useTransform(mv, (v) => `${prefijo}${formatear(v, decimales)}${sufijo}`)
 
   useEffect(() => {
+    if (!animar) return
     if (!enVista) return
     if (menosMovimiento) {
       mv.set(valor)
@@ -49,7 +62,13 @@ export function CifraAnimada({
     }
     const control = animate(mv, valor, { duration: duracion.conteo, ease: curva.salida })
     return () => control.stop()
-  }, [enVista, valor, menosMovimiento, mv])
+  }, [animar, enVista, valor, menosMovimiento, mv])
+
+  if (!animar) {
+    return (
+      <span className={className}>{`${prefijo}${formatear(valor, decimales)}${sufijo}`}</span>
+    )
+  }
 
   return (
     <motion.span ref={ref} className={className}>
