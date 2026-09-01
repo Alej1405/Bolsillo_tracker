@@ -66,6 +66,23 @@ export function TarjetaBolsilloPanel({
         {conSimbolo(bolsillo.balance)}
       </p>
 
+      {/*
+        Un bolsillo en rojo era solo un número de otro color. Es el momento en
+        que la persona más necesita saber qué pasó, y el producto —que escribe
+        bien en todas partes— se callaba justo aquí.
+
+        La frase no regaña ni alarma: explica el mecanismo, que casi siempre es
+        el mismo —se anotó gasto que no se había registrado como ingreso— y
+        dice qué hacer. Un saldo negativo suele ser un apunte que falta, no una
+        deuda real.
+      */}
+      {negativo && !archivado && (
+        <p className="rounded-grande bg-gasto-sutil px-4 py-3 text-nota leading-relaxed text-texto-secundario">
+          Aquí has anotado más gastos que ingresos. Suele pasar cuando entró plata que
+          todavía no registraste: anótala como ingreso y el saldo se acomoda.
+        </p>
+      )}
+
       <div className="flex items-center gap-2">
         <Pista texto="Editar">
           <button type="button" onClick={onEditar} disabled={ocupado} className={accion}>

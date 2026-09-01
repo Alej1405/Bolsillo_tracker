@@ -61,12 +61,18 @@ export function Campo({
           onChange={onCambio && ((e) => onCambio(e.target.value))}
           aria-invalid={error ? true : undefined}
           aria-describedby={`${id}-nota`}
+          /*
+            El anillo de foco va en `lavanda-700`. Con `lavanda-300`/`400` daba 1,38 y
+            1,60 contra el blanco del campo, y WCAG 2.2 (SC 2.4.11) pide 3:1 para el
+            indicador de foco: era un anillo que técnicamente estaba y en la práctica no
+            se veía. En 700 son 5,28:1.
+          */
           className={`h-11 w-full rounded-medio border bg-fondo-superficie pl-4 text-cuerpo-medio text-texto-principal outline-none placeholder:text-texto-tenue focus:ring-2 ${
             esClave ? 'pr-12' : 'pr-4'
           } ${
             error
-              ? 'border-gasto focus:border-gasto focus:ring-gasto/30'
-              : 'border-borde-normal focus:border-lavanda-500 focus:ring-lavanda-300'
+              ? 'border-gasto focus:border-gasto focus:ring-gasto'
+              : 'border-borde-normal focus:border-lavanda-700 focus:ring-lavanda-700'
           }`}
         />
         {esClave && (

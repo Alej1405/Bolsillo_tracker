@@ -39,6 +39,15 @@ export function CabeceraDash({
 
   const enContra = neto?.trim().startsWith('-')
   /*
+    Un mes sin movimientos no es un mes en positivo.
+
+    La píldora pintaba «+ $0,00» en verde: el signo y el color dicen "ganaste",
+    y cero no es ganar nada. En una aplicación de finanzas eso es lo único que
+    la interfaz no se puede permitir, porque es el dato que la persona viene a
+    creerse. En cero se dice lo que pasa, en gris y sin signo.
+  */
+  const enCero = Number(neto?.replace(',', '.') ?? 0) === 0
+  /*
     El formateo va por `utils/moneda`, que es el único sitio que sabe leer las
     dos formas en que llegan los montos: "12.40" del backend real y "1.248,50"
     del mock. Aquí había una función propia que solo añadía ",00" cuando no
@@ -77,22 +86,29 @@ export function CabeceraDash({
       <Esperando alto={32} className="w-40 rounded-full" /> 
       ) : (
         (neto) && (
-          <p className={`flex items-center gap-4 rounded-full px-4 py-1 shadow-xl ${enContra ? 'bg-gasto-sutil' : 'bg-ingreso-sutil'}`}>
+          <p
+            className={`flex items-center gap-4 rounded-full px-4 py-1 shadow-xl ${
+              enCero ? 'bg-fondo-sutil' : enContra ? 'bg-gasto-sutil' : 'bg-ingreso-sutil'
+            }`}
+          >
             {neto && (
               <>
                 <span className="text-nota text-texto-secundario uppercase">
                   {nombreDelMes(mes) || 'Este mes'}
                 </span>
-                <span
-                  className={`font-cuerpo text-cuerpo-amplio font-bold tabular-nums ${
-                    enContra ? 'text-gasto' : 'text-ingreso'
-                  }`}
-                >
-                  {enContra ? '−' : '+'} ${limpio}
-                </span>
+                {enCero ? (
+                  <span className="text-nota text-texto-secundario">Sin movimientos</span>
+                ) : (
+                  <span
+                    className={`font-cuerpo text-cuerpo-amplio font-bold tabular-nums ${
+                      enContra ? 'text-gasto' : 'text-ingreso'
+                    }`}
+                  >
+                    {enContra ? '−' : '+'} ${limpio}
+                  </span>
+                )}
               </>
             )}
-
           </p>
         )
       )}

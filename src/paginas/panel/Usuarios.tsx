@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react'
-import { ProhibitIcon, TrashIcon, WarningCircleIcon } from '@phosphor-icons/react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  MagnifyingGlassIcon,
+  ProhibitIcon,
+  TrashIcon,
+  WarningCircleIcon,
+} from '@phosphor-icons/react'
 import { EsperandoLista } from '@/layout/panel/Esperando'
-import { iniciales, accion, accionDestructiva } from '@/helpers'
+import { accion, accionDestructiva, control, iniciales } from '@/helpers'
 import { Paginacion } from '@/piezas'
 import { Boton } from '@/ui/Boton'
 import { Cifra } from '@/ui/Cifra'
@@ -145,6 +150,14 @@ export function Usuarios() {
   const borrarParaSiempre = useAppStore((e) => e.borrarUsuarioParaSiempre)
 
   const [filtro, setFiltro] = useState<Filtro>('todos')
+  /*
+    La búsqueda se resuelve aquí, sobre la página cargada: `GET /users` acepta
+    `page`, `page_size` e `is_active`, pero no texto. Con el tamaño de página
+    que pedimos alcanza de sobra hoy; el día que no, la búsqueda tiene que
+    bajar al servidor, porque filtrar solo lo cargado empieza a mentir en
+    cuanto hay más usuarios que caben en una página.
+  */
+  const [busqueda, setBusqueda] = useState('')
   const [pagina, setPagina] = useState(1)
   const [porBorrar, setPorBorrar] = useState<UsuarioAdmin | null>(null)
   const [confirmacion, setConfirmacion] = useState('')
@@ -153,6 +166,19 @@ export function Usuarios() {
   useEffect(() => {
     void cargarUsuarios(pagina, comoFiltro(filtro))
   }, [cargarUsuarios, pagina, filtro])
+
+  /* Por nombre o por correo, sin acentos ni mayúsculas: se busca "maria" y
+     aparece "María". */
+  const sinTildes = (t: string) =>
+    t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
+  const encontrados = useMemo(() => {
+    const q = sinTildes(busqueda.trim())
+    if (!q) return usuarios
+    return usuarios.filter(
+      (u) => sinTildes(u.full_name).includes(q) || sinTildes(u.email).includes(q),
+    )
+  }, [usuarios, busqueda])
 
   useEffect(() => {
     void cargarEstadisticas()
@@ -231,6 +257,25 @@ export function Usuarios() {
             onClick={() => cambiarFiltro(f.id)}
           />
         ))}
+
+        <div className="relative min-w-[220px] flex-1">
+          <MagnifyingGlassIcon
+            size={16}
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-texto-tenue"
+          />
+          <label htmlFor="buscar-usuario" className="sr-only">
+            Buscar por nombre o correo
+          </label>
+          <input
+            id="buscar-usuario"
+            type="search"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar por nombre o correo…"
+            className={`${control} w-full rounded-full pr-4 pl-9`}
+          />
+        </div>
       </div>
 
       {aviso && (
@@ -248,9 +293,9 @@ export function Usuarios() {
         </div>
       ) : cargando ? (
         <EsperandoLista filas={6} alto={72} />
-      ) : usuarios.length > 0 ? (
+      ) : encontrados.length > 0 ? (
         <div className="flex flex-col gap-2">
-          {usuarios.map((u) => (
+          {encontrados.map((u) => (
             <Fila
               key={u.id}
               usuario={u}
@@ -262,15 +307,29 @@ export function Usuarios() {
           ))}
         </div>
       ) : (
-        <p className="rounded-extra bg-fondo-superficie px-5 py-10 text-center text-cuerpo text-texto-secundario">
-          Ninguna cuenta con este filtro.
-        </p>
+        /*
+          Buscar sin resultados y no tener usuarios son dos estados distintos:
+          el primero se arregla borrando lo escrito y el segundo no se arregla.
+          Un texto único obligaría a adivinar en cuál de los dos estás.
+        */
+        <div className="flex flex-col items-center gap-3 rounded-extra bg-fondo-superficie px-5 py-10 text-center">
+          <p className="text-cuerpo text-texto-secundario">
+            {busqueda.trim()
+              ? `Ninguna cuenta coincide con «${busqueda.trim()}».`
+              : 'Ninguna cuenta con este filtro.'}
+          </p>
+          {busqueda.trim() && (
+            <Boton variante="secundario" onClick={() => setBusqueda('')}>
+              Quitar la búsqueda
+            </Boton>
+          )}
+        </div>
       )}
 
       {!cargando && !error && (
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-nota text-texto-tenue">
-            {usuarios.length} de {total}
+            {encontrados.length} de {busqueda.trim() ? usuarios.length : total}
           </p>
           <Paginacion pagina={pagina} paginas={paginas} ir={setPagina} variante="pasos" />
         </div>

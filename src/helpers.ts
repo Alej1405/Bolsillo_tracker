@@ -68,6 +68,47 @@ export function rangoDelMes(anio: number, mes: number): { desde: string; hasta: 
   return { desde: `${anio}-${dd(mes)}-01`, hasta: `${anio}-${dd(mes)}-${dd(ultimo)}` }
 }
 
+/*
+  Los tres rangos que se piden casi siempre.
+
+  Filtrar el mes en curso exige hoy teclear dos fechas completas, y es la
+  consulta más repetida de todas: un atajo ahorra el caso común y deja los
+  campos para el que no lo es.
+*/
+export const ATAJOS_DE_FECHA: { id: string; texto: string; rango: () => { desde: string; hasta: string } }[] = [
+  {
+    id: 'este-mes',
+    texto: 'Este mes',
+    rango: () => {
+      const h = new Date()
+      return rangoDelMes(h.getFullYear(), h.getMonth() + 1)
+    },
+  },
+  {
+    id: 'mes-pasado',
+    texto: 'Mes pasado',
+    rango: () => {
+      const h = new Date()
+      /* Con `getMonth()` a secas, en enero da mes 0 → el Date retrocede al
+         diciembre anterior por su cuenta, que es justo lo que se quiere. */
+      const m = new Date(h.getFullYear(), h.getMonth() - 1, 1)
+      return rangoDelMes(m.getFullYear(), m.getMonth() + 1)
+    },
+  },
+  {
+    id: 'ultimos-30',
+    texto: 'Últimos 30 días',
+    rango: () => {
+      const dd = (n: number) => String(n).padStart(2, '0')
+      const iso = (d: Date) => `${d.getFullYear()}-${dd(d.getMonth() + 1)}-${dd(d.getDate())}`
+      const hoy = new Date()
+      const antes = new Date(hoy)
+      antes.setDate(antes.getDate() - 29)
+      return { desde: iso(antes), hasta: iso(hoy) }
+    },
+  },
+]
+
 /** Nombre del mes de un "2026-08" que llega de la API. Cadena vacía si no hay. */
 export function nombreDelMes(mes?: string): string {
   if (!mes) return ''

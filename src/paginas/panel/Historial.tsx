@@ -13,7 +13,14 @@ import { FilaMovimiento } from '@/piezas'
 import { Boton } from '@/ui/Boton'
 import { Paginacion } from '@/piezas'
 import { Ficha } from '@/ui/Ficha'
-import { control, etiquetaDeCategoria, foco, hojasDeCategorias, selector } from '@/helpers'
+import {
+  ATAJOS_DE_FECHA,
+  control,
+  etiquetaDeCategoria,
+  foco,
+  hojasDeCategorias,
+  selector,
+} from '@/helpers'
 import { EditarMovimiento } from '@/paginas/panel/EditarMovimiento'
 import { Modal } from '@/ui/Modal'
 import { Hoja } from '@/layout/celular/Hoja'
@@ -257,6 +264,33 @@ export function Historial() {
                 className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-texto-tenue"
               />
           </div>
+        </div>
+
+        {/*
+          Los tres rangos de siempre, delante de los campos. Teclear dos fechas
+          completas para pedir "este mes" es el trabajo más repetido de esta
+          pantalla, y el que menos falta hacía.
+
+          La píldora se marca sola cuando las fechas coinciden con su rango:
+          así también sirve para leer qué se está mirando, no solo para elegir.
+        */}
+        <div className="flex w-full flex-wrap items-center gap-2">
+          {ATAJOS_DE_FECHA.map((a) => {
+            const r = a.rango()
+            const puesto = desde === r.desde && hasta === r.hasta
+            return (
+              <Ficha
+                key={a.id}
+                texto={a.texto}
+                activa={puesto}
+                onClick={() => {
+                  /* Volver a pulsar el que ya está puesto lo quita. */
+                  cambiar(setDesde)(puesto ? '' : r.desde)
+                  setHasta(puesto ? '' : r.hasta)
+                }}
+              />
+            )
+          })}
         </div>
 
         <div className="flex flex-col gap-1.5">

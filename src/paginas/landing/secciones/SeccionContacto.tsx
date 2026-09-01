@@ -20,7 +20,7 @@ const iconos: Record<ClaseCanal, Icon> = {
 }
 
 const campo =
-  'w-full rounded-grande bg-fondo-superficie px-4 text-cuerpo-medio text-texto-principal outline-none placeholder:text-texto-tenue focus:ring-2 focus:ring-lavanda-400'
+  'w-full rounded-grande bg-fondo-superficie px-4 text-cuerpo-medio text-texto-principal outline-none placeholder:text-texto-tenue focus:ring-2 focus:ring-lavanda-700'
 
 export function SeccionContacto() {
   /*

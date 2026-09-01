@@ -75,6 +75,8 @@ export function ArmazonPanelCelular() {
   const foto = urlDeMedio(usuario?.avatar_url)
   const neto = dashboard?.summary?.net
   const enContra = neto?.trim().startsWith('-')
+  /* Igual que en escritorio: cero no es un mes en positivo. */
+  const enCero = Number(neto?.replace(',', '.') ?? 0) === 0
   const activos = estadisticas?.users.active
 
   const extras = esAdmin ? MAS_ADMIN : MAS_CLIENTE
@@ -118,10 +120,14 @@ export function ArmazonPanelCelular() {
           : neto && (
               <span
                 className={`shrink-0 rounded-full px-3 py-1 text-micro font-bold tabular-nums ${
-                  enContra ? 'bg-gasto-sutil text-gasto' : 'bg-ingreso-sutil text-ingreso'
+                  enCero
+                    ? 'bg-fondo-sutil text-texto-secundario'
+                    : enContra
+                      ? 'bg-gasto-sutil text-gasto'
+                      : 'bg-ingreso-sutil text-ingreso'
                 }`}
               >
-                {enContra ? '−' : '+'} ${formatearMonto(neto.replace('-', ''))}
+                {enCero ? 'Sin movimientos' : `${enContra ? '−' : '+'} $${formatearMonto(neto.replace('-', ''))}`}
               </span>
             )}
       </header>
