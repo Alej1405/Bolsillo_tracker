@@ -44,13 +44,13 @@ const variantes: Record<Variante, string> = {
   */
   peligro: 'rounded-nav bg-error text-texto-sobre-marca hover:bg-gasto',
   // variante para botones mas sutilies o tenues para el uso en lugares donde no es tan bueno que resalte el boton.
-  cta: 'rounded-nav  text-leyenda text-white ',
+  cta: 'rounded-nav  text-diminuto text-white font-titulo',
 
   salir: 'rounded-nav bg-lavanda-900 text-leyenda hover:bg-lavanda-400 text-white',
 }
 
 const tamanos: Record<Tamano, string> = {
-  pequeno: 'p-1 py-2',
+  pequeno: 'p-1 py-2 text-diminuto',
   mediano: 'h-11 px-5 text-cuerpo',
   grande: 'h-[52px] px-7 text-cuerpo-medio',
 }

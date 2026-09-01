@@ -35,6 +35,13 @@ export function Hoja({
   const menosMovimiento = useReducedMotion()
   const panel = useRef<HTMLDivElement>(null)
 
+  /* Igual que en `Modal`: una flecha inline en cada render remontaría el
+     efecto con cada tecla y robaría el foco de lo que estés escribiendo. */
+  const alCerrar = useRef(onCerrar)
+  useEffect(() => {
+    alCerrar.current = onCerrar
+  }, [onCerrar])
+
   /*
     Escape cierra, y el fondo deja de desplazarse mientras está abierta: si la
     página de detrás se mueve al arrastrar, el gesto de cerrar compite con el
@@ -44,7 +51,7 @@ export function Hoja({
     if (!abierta) return
 
     const alTeclear = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCerrar()
+      if (e.key === 'Escape') alCerrar.current()
     }
     const overflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -57,7 +64,7 @@ export function Hoja({
       document.body.style.overflow = overflow
       window.removeEventListener('keydown', alTeclear)
     }
-  }, [abierta, onCerrar])
+  }, [abierta])
 
   return createPortal(
     <AnimatePresence>

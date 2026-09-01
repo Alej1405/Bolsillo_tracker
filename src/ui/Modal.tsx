@@ -11,6 +11,19 @@ type ModalProps = {
   onCerrar: () => void
   /** Describe el diálogo para un lector de pantalla. Es el título visible. */
   titulo: string
+  /*
+    Un diálogo del que no se sale hasta resolverlo: sin equis, sin Escape y sin
+    clic fuera. Se reserva para cuando detrás no hay nada que mirar —un panel
+    sin bolsillos no muestra datos, muestra ceros— y cerrarlo solo llevaría a
+    una pantalla vacía sin explicación. En cualquier otro caso es una trampa.
+  */
+  obligatorio?: boolean
+  /*
+    `amplio` para lo que se lee en rejilla y no cabe en una columna de 440px.
+    Sigue siendo un diálogo, no una pantalla: por encima de esto, lo que se
+    quiere es una pantalla.
+  */
+  ancho?: 'normal' | 'amplio'
   children: React.ReactNode
 }
 
@@ -29,10 +42,30 @@ type ModalProps = {
  * el `backdrop-blur` de la tarjeta del formulario, que dejaba el popup metido
  * en el ancho de la tarjeta en vez de cubrir la pantalla.
  */
-export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
+export function Modal({
+  abierto,
+  onCerrar,
+  titulo,
+  obligatorio = false,
+  ancho = 'normal',
+  children,
+}: ModalProps) {
   const menosMovimiento = useReducedMotion()
   const panel = useRef<HTMLDivElement>(null)
   const focoPrevio = useRef<HTMLElement | null>(null)
+
+  /*
+    `onCerrar` casi siempre llega como flecha inline, así que es una función
+    distinta en cada render. Si el efecto dependiera de ella se limpiaría y se
+    volvería a montar con cada pulsación: devolvía el foco fuera del diálogo y
+    lo llevaba de vuelta al primer campo. En un teléfono eso cierra el teclado
+    en cuanto escribes una letra, y no se podía redactar un mensaje de soporte.
+    Guardada en una ref, el efecto solo depende de si el diálogo está abierto.
+  */
+  const alCerrar = useRef(onCerrar)
+  useEffect(() => {
+    alCerrar.current = onCerrar
+  }, [onCerrar])
 
   useEffect(() => {
     if (!abierto) return
@@ -52,7 +85,7 @@ export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
 
     const alPulsar = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onCerrar()
+        if (!obligatorio) alCerrar.current()
         return
       }
       if (e.key !== 'Tab') return
@@ -92,7 +125,7 @@ export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
       document.body.style.overflow = scrollPrevio
       focoPrevio.current?.focus()
     }
-  }, [abierto, onCerrar])
+  }, [abierto, obligatorio])
 
   return createPortal(
     <AnimatePresence>
@@ -121,7 +154,7 @@ export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
           */}
           <div
             aria-hidden
-            onClick={onCerrar}
+            onClick={obligatorio ? undefined : onCerrar}
             className="absolute inset-0 bg-tinta-950/45 backdrop-blur-sm"
           />
 
@@ -140,7 +173,7 @@ export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
               que es lo que hace `place-items-center` a secas con contenido
               más alto que la pantalla.
             */
-            className="relative my-auto w-full max-w-[440px] rounded-extra bg-fondo-superficie p-6 shadow-[0_24px_60px_-20px_color-mix(in_srgb,var(--color-tinta-950)_35%,transparent)] sm:p-8"
+            className={`relative my-auto w-full ${ancho === 'amplio' ? 'max-w-[760px]' : 'max-w-[440px]'} rounded-extra bg-fondo-superficie p-6 shadow-[0_24px_60px_-20px_color-mix(in_srgb,var(--color-tinta-950)_35%,transparent)] sm:p-8`}
           >
             {/*
               La salida visible. El diálogo ya se cierra con Escape y con un
@@ -151,6 +184,7 @@ export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
               cierren todos igual, y `absolute` para que no empuje el contenido
               ni obligue a cada uno a dejarle sitio.
             */}
+            {!obligatorio && (
             <button
               type="button"
               onClick={onCerrar}
@@ -159,6 +193,7 @@ export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
             >
               <XIcon size={18} weight="bold" aria-hidden />
             </button>
+            )}
 
             {children}
           </motion.div>

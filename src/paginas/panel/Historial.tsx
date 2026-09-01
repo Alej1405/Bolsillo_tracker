@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MagnifyingGlassIcon, XIcon, CaretDownIcon } from '@phosphor-icons/react'
+import { MagnifyingGlassIcon, XIcon, CaretDownIcon, FunnelIcon } from '@phosphor-icons/react'
 import { EsperandoLista } from '@/layout/panel/Esperando'
 import { aFilas } from '@/paginas/panel/adaptadores'
 import { FilaMovimiento } from '@/piezas'
@@ -7,6 +7,8 @@ import { Boton } from '@/ui/Boton'
 import { Paginacion } from '@/piezas'
 import { Ficha } from '@/ui/Ficha'
 import { control, etiquetaDeCategoria, foco, hojasDeCategorias, selector } from '@/helpers'
+import { Hoja } from '@/layout/celular/Hoja'
+import { useTipoPantalla } from '@/pantalla'
 import { useAppStore } from '@/stores/useAppStore'
 import type { FiltrosMovimientos } from '@/services/MovimientosService'
 
@@ -91,9 +93,10 @@ export function Historial() {
     setPagina(1)
   }
 
-  const hayFiltros = Boolean(
-    tipo !== 'todo' || bolsillo || categoria || desde || hasta || busqueda,
-  )
+  const cuantosFiltros = [tipo !== 'todo', bolsillo, categoria, desde, hasta, busqueda].filter(
+    Boolean,
+  ).length
+  const hayFiltros = cuantosFiltros > 0
 
   const limpiar = () => {
     setTipo('todo')
@@ -109,6 +112,147 @@ export function Historial() {
   const paginas = historial?.total_pages ?? 1
   const total = historial?.total ?? 0
   const elegibles = useMemo(() => hojasDeCategorias(categorias), [categorias])
+  const esCelular = useTipoPantalla() === 'celular'
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
+
+  /*
+    Los campos, escritos una sola vez. En el teléfono viven dentro de la hoja y
+    en pantallas grandes dentro de la tarjeta: es el mismo formulario en dos
+    marcos, y tenerlo duplicado obligaría a arreglar cada fallo dos veces.
+  */
+  const camposDeFiltro = (
+    <>
+
+
+      <div className="flex flex-wrap items-center gap-2">
+        {TIPOS.map((t) => (
+          <Ficha
+            key={t.id}
+            texto={t.texto}
+            activa={tipo === t.id}
+            onClick={() => cambiar(setTipo)(t.id)}
+          />
+        ))}
+
+        <div className="relative min-w-[200px] flex-1">
+          <MagnifyingGlassIcon
+            size={16}
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-texto-tenue"
+          />
+          {/* El backend busca solo en `note`, comprobado contra el servidor:
+              "Alimentación" no encuentra los movimientos de esa categoría.
+              Para filtrar por categoría está su propio selector. */}
+          <label htmlFor="buscar-historial" className="sr-only">
+            Buscar en las notas de tus movimientos
+          </label>
+          <input
+            id="buscar-historial"
+            type="search"
+            value={busqueda}
+            onChange={(e) => cambiar(setBusqueda)(e.target.value)}
+            placeholder="Buscar en las notas…"
+            className={`${control} w-full rounded-full pr-4 pl-9`}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex min-w-[160px] flex-1 flex-col gap-1.5">
+          <label htmlFor="bolsillo-historial" className="text-micro text-texto-tenue">
+            Bolsillo
+          </label>
+          <div className="relative">
+            <select
+              id="bolsillo-historial"
+              value={bolsillo}
+              onChange={(e) => cambiar(setBolsillo)(e.target.value)}
+              className={`${selector} w-full`}
+            >
+              <option value="">Todos</option>
+              {bolsillos.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+            <CaretDownIcon
+              size={14}
+              weight="bold"
+              aria-hidden
+              className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-texto-tenue"
+            />
+          </div>
+        </div>
+
+        <div className="flex min-w-[160px] flex-1 flex-col gap-1.5">
+          <label htmlFor="categoria-historial" className="text-micro text-texto-tenue">
+            Categoría
+          </label>
+          <div className="relative">
+            <select
+              id="categoria-historial"
+              value={categoria}
+              onChange={(e) => cambiar(setCategoria)(e.target.value)}
+              className={`${selector} w-full`}
+            >
+              <option value="">Todas</option>
+              {elegibles.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {etiquetaDeCategoria(c)}
+                </option>
+              ))}
+            </select>
+            <CaretDownIcon
+                size={14}
+                weight="bold"
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-texto-tenue"
+              />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="desde-historial" className="text-micro text-texto-tenue">
+            Desde
+          </label>
+          <input
+            id="desde-historial"
+            type="date"
+            value={desde}
+            max={hasta || undefined}
+            onChange={(e) => cambiar(setDesde)(e.target.value)}
+            className={control}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="hasta-historial" className="text-micro text-texto-tenue">
+            Hasta
+          </label>
+          <input
+            id="hasta-historial"
+            type="date"
+            value={hasta}
+            min={desde || undefined}
+            onChange={(e) => cambiar(setHasta)(e.target.value)}
+            className={control}
+          />
+        </div>
+
+        {hayFiltros && (
+          <button
+            type="button"
+            onClick={limpiar}
+            className={`flex min-h-11 items-center gap-2 rounded-full px-4 text-nota font-medium text-texto-secundario transition-colors hover:bg-fondo-sutil ${foco}`}
+          >
+            <XIcon size={14} weight="bold" aria-hidden />
+            Quitar filtros
+          </button>
+        )}
+      </div>
+    </>
+  )
 
   return (
     <section className="vidrio-transparente flex flex-1 flex-col gap-5 rounded-maximo p-5 md:p-6">
@@ -123,135 +267,47 @@ export function Historial() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-extra bg-fondo-superficie p-4">
-        <div className="flex flex-wrap items-center gap-2">
-          {TIPOS.map((t) => (
-            <Ficha
-              key={t.id}
-              texto={t.texto}
-              activa={tipo === t.id}
-              onClick={() => cambiar(setTipo)(t.id)}
-            />
-          ))}
+      {/*
+        En el teléfono los filtros no se muestran, se piden.
 
-          <div className="relative min-w-[200px] flex-1">
-            <MagnifyingGlassIcon
-              size={16}
-              aria-hidden
-              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-texto-tenue"
-            />
-            {/* El backend busca solo en `note`, comprobado contra el servidor:
-                "Alimentación" no encuentra los movimientos de esa categoría.
-                Para filtrar por categoría está su propio selector. */}
-            <label htmlFor="buscar-historial" className="sr-only">
-              Buscar en las notas de tus movimientos
-            </label>
-            <input
-              id="buscar-historial"
-              type="search"
-              value={busqueda}
-              onChange={(e) => cambiar(setBusqueda)(e.target.value)}
-              placeholder="Buscar en las notas…"
-              className={`${control} w-full rounded-full pr-4 pl-9`}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex min-w-[160px] flex-1 flex-col gap-1.5">
-            <label htmlFor="bolsillo-historial" className="text-micro text-texto-tenue">
-              Bolsillo
-            </label>
-            <div className="relative">
-              <select
-                id="bolsillo-historial"
-                value={bolsillo}
-                onChange={(e) => cambiar(setBolsillo)(e.target.value)}
-                className={`${selector} w-full`}
-              >
-                <option value="">Todos</option>
-                {bolsillos.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-              <CaretDownIcon
-                size={14}
-                weight="bold"
-                aria-hidden
-                className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-texto-tenue"
-              />
-            </div>
-          </div>
-
-          <div className="flex min-w-[160px] flex-1 flex-col gap-1.5">
-            <label htmlFor="categoria-historial" className="text-micro text-texto-tenue">
-              Categoría
-            </label>
-            <div className="relative">
-              <select
-                id="categoria-historial"
-                value={categoria}
-                onChange={(e) => cambiar(setCategoria)(e.target.value)}
-                className={`${selector} w-full`}
-              >
-                <option value="">Todas</option>
-                {elegibles.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {etiquetaDeCategoria(c)}
-                  </option>
-                ))}
-              </select>
-              <CaretDownIcon
-                  size={14}
-                  weight="bold"
-                  aria-hidden
-                  className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-texto-tenue"
-                />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="desde-historial" className="text-micro text-texto-tenue">
-              Desde
-            </label>
-            <input
-              id="desde-historial"
-              type="date"
-              value={desde}
-              max={hasta || undefined}
-              onChange={(e) => cambiar(setDesde)(e.target.value)}
-              className={control}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="hasta-historial" className="text-micro text-texto-tenue">
-              Hasta
-            </label>
-            <input
-              id="hasta-historial"
-              type="date"
-              value={hasta}
-              min={desde || undefined}
-              onChange={(e) => cambiar(setHasta)(e.target.value)}
-              className={control}
-            />
-          </div>
+        Desplegados ocupaban 700 de los 844 px de la pantalla: nueve controles
+        por delante de lo que la persona vino a ver. Aquí son un botón que dice
+        cuántos hay puestos y una hoja que sube cuando hace falta, y la lista
+        empieza arriba. En pantallas grandes sí caben al lado del contenido y se
+        quedan donde estaban: ahí esconderlos sería un toque de más por nada.
+      */}
+      {esCelular ? (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setFiltrosAbiertos(true)}
+            className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-borde-fuerte bg-fondo-superficie px-4 text-nota font-medium text-texto-principal transition-colors active:scale-[0.98] ${foco}`}
+          >
+            <FunnelIcon size={16} weight={hayFiltros ? 'fill' : 'regular'} aria-hidden />
+            Filtrar
+            {hayFiltros && (
+              <span className="grid size-5 place-items-center rounded-full bg-lavanda-900 text-micro font-bold text-texto-inverso tabular-nums">
+                {cuantosFiltros}
+              </span>
+            )}
+          </button>
 
           {hayFiltros && (
             <button
               type="button"
               onClick={limpiar}
-              className={`flex min-h-11 items-center gap-2 rounded-full px-4 text-nota font-medium text-texto-secundario transition-colors hover:bg-fondo-sutil ${foco}`}
+              aria-label="Quitar todos los filtros"
+              className={`grid size-11 shrink-0 place-items-center rounded-full border border-borde-fuerte text-texto-secundario transition-colors active:scale-[0.95] ${foco}`}
             >
-              <XIcon size={14} weight="bold" aria-hidden />
-              Quitar filtros
+              <XIcon size={16} weight="bold" aria-hidden />
             </button>
           )}
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-col gap-3 rounded-extra bg-fondo-superficie p-4">
+          {camposDeFiltro}
+        </div>
+      )}
 
       {error ? (
         <div role="alert" className="flex flex-wrap items-center gap-3 rounded-extra bg-gasto-sutil px-5 py-4">
@@ -304,6 +360,13 @@ export function Historial() {
           <Paginacion pagina={pagina} paginas={paginas} ir={setPagina} variante="pasos" />
         </div>
       )}
+      <Hoja
+        abierta={esCelular && filtrosAbiertos}
+        onCerrar={() => setFiltrosAbiertos(false)}
+        titulo="Filtrar movimientos"
+      >
+        <div className="flex flex-col gap-3 pb-2">{camposDeFiltro}</div>
+      </Hoja>
     </section>
   )
 }

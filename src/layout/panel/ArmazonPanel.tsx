@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
+import { PrimerBolsillo, ResumenRendimiento } from '@/piezas'
 import { WarningCircleIcon } from '@phosphor-icons/react'
 import { Fondo } from '@/layout/landing/Fondo'
 import { CabeceraDash } from '@/layout/panel/CabeceraDash'
@@ -135,6 +136,14 @@ export function ArmazonPanel() {
         Crear un bolsillo también vive aquí: se abre desde su pantalla y desde
         el popup de anotar un gasto, cuando todavía no hay ninguno.
       */}
+      {/*
+        Va en el armazón y no en cada pantalla: sin bolsillos todas muestran
+        cero, así que la bienvenida hace falta en cualquiera de ellas, y
+        repetirla pantalla por pantalla sería siete sitios que mantener.
+      */}
+      <PrimerBolsillo />
+      <ResumenRendimiento />
+
       <Modal abierto={crearAbierto} onCerrar={cerrarCrearBolsillo} titulo="Crear un bolsillo">
         <FormularioBolsillo
           onListo={() => {

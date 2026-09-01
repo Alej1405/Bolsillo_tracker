@@ -36,6 +36,12 @@ export type CuentasSliceType = {
     evita mandar a la persona a otra pantalla a medio camino.
   */
   crearAbierto: boolean
+  /*
+    Si la lista ya se pidió al servidor alguna vez. `bolsillos: []` no basta
+    para saber si alguien no tiene ninguno: al arrancar también está vacía, y
+    la bienvenida al primer bolsillo aparecería un instante a todo el mundo.
+  */
+  bolsillosPedidos: boolean
 
   cargarBolsillos: (incluirArchivados?: boolean) => Promise<void>
   crearBolsillo: (datos: DatosCrearCuenta) => Promise<Cuenta>
@@ -56,6 +62,7 @@ export const createCuentasSlice: StateCreator<CuentasSliceType> = (set, get) => 
   guardandoBolsillo: false,
   bolsilloCreado: null,
   crearAbierto: false,
+  bolsillosPedidos: false,
 
   abrirCrearBolsillo: () => set({ crearAbierto: true }),
   cerrarCrearBolsillo: () => set({ crearAbierto: false }),
@@ -70,7 +77,7 @@ export const createCuentasSlice: StateCreator<CuentasSliceType> = (set, get) => 
         errorBolsillos: error instanceof Error ? error.message : 'No pudimos cargar tus bolsillos.',
       })
     } finally {
-      set({ cargandoBolsillos: false })
+      set({ cargandoBolsillos: false, bolsillosPedidos: true })
     }
   },
 

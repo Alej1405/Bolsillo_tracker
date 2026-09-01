@@ -151,9 +151,9 @@ export function NavLateral() {
             variante="cta"
             title="Mover a ahorro"
             tamano="pequeno"
-            className="min-h-11 w-full px-4! xl:px-6! bg-lavanda-700 hover:bg-lavanda-600"
+            className="px-4! xl:px-6! bg-lavanda-700 hover:bg-lavanda-600"
           >
-            <span className="text-nota xl:text-cuerpo">Mover a ahorro</span>
+            <span className="text-leyenda xl:text-nota">Mover a ahorro</span>
           </Boton>
 
           <Boton
@@ -161,9 +161,9 @@ export function NavLateral() {
             variante="cta"
             title="Registrar un ingreso"
             tamano="pequeno"
-            className="min-h-11 w-full px-4! xl:px-6! bg-marca-700 hover:bg-tinta-400"
+            className="px-4! xl:px-6! bg-marca-700 hover:bg-tinta-400"
           >
-            <span className="text-nota xl:text-cuerpo">Registrar un ingreso</span>
+            <span className="text-leyenda xl:text-nota">Registrar un ingreso</span>
           </Boton>
 
           <Boton
@@ -171,9 +171,9 @@ export function NavLateral() {
             variante="cta"
             title="Anotar un gasto"
             tamano="pequeno"
-            className="min-h-11 w-full px-4! xl:px-6! bg-marca-700 hover:bg-tinta-400"
+            className="px-4! xl:px-6! bg-marca-700 hover:bg-tinta-400"
           >
-            <span className="text-nota xl:text-cuerpo">Anotar un gasto</span>
+            <span className="text-leyenda xl:text-nota">Anotar un gasto</span>
           </Boton>
         </div>
         )}

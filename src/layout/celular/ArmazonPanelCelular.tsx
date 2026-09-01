@@ -11,6 +11,7 @@ import { tituloDe } from '@/layout/panel/destinos'
 import { Fondo } from '@/layout/landing/Fondo'
 import { AnotarGasto } from '@/paginas/panel/AnotarGasto'
 import { FormularioBolsillo } from '@/paginas/panel/FormularioBolsillo'
+import { PrimerBolsillo, ResumenRendimiento } from '@/piezas'
 import { Modal } from '@/ui/Modal'
 import { iniciales, nombreDelMes, rangoDelMes, useCerrarSesion } from '@/helpers'
 import { urlDeMedio } from '@/utils/medios'
@@ -187,6 +188,9 @@ export function ArmazonPanelCelular() {
       >
         {gastoAbierto && <AnotarGasto tipo={gastoAbierto} onCerrar={cerrarMovimiento} />}
       </Modal>
+
+      <PrimerBolsillo />
+      <ResumenRendimiento />
 
       <Modal abierto={crearAbierto} onCerrar={cerrarCrearBolsillo} titulo="Crear un bolsillo">
         <FormularioBolsillo
