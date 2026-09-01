@@ -4,15 +4,10 @@ import { Boton } from '@/ui/Boton'
 import { DESTINOS } from '@/layout/panel/destinos'
 import type { Destino } from '@/layout/panel/destinos'
 import { escalonado, useAparicion } from '@/movimiento'
+import { iniciales } from '@/helpers'
+import { urlDeMedio } from '@/utils/medios'
 import { useAppStore } from '@/stores/useAppStore'
 import logo from '@/assets/logo.png'
-
-/** Iniciales del nombre. El registro no pide foto, solo nombre y correo. */
-function iniciales(nombre?: string): string {
-  if (!nombre) return '··'
-  const partes = nombre.trim().split(/\s+/)
-  return (partes[0][0] + (partes[1]?.[0] ?? '')).toUpperCase()
-}
 
 /*
   Un destino.
@@ -72,28 +67,52 @@ function Enlace({ a, etiqueta, Icono }: Destino) {
 export function NavLateral() {
   const usuario = useAppStore((e) => e.usuario)
   const nombre = usuario?.full_name
+  const foto = urlDeMedio(usuario?.avatar_url)
   const aparece = useAparicion()
   const abrirGasto = useAppStore((e) => e.abrirGasto)
+  const abrirIngreso = useAppStore((e) => e.abrirIngreso)
+  const abrirAhorro = useAppStore((e) => e.abrirAhorro)
 
-  const principales = DESTINOS.filter((d) => d.a !== '/mi-cuenta')
-  const cuenta = DESTINOS.find((d) => d.a === '/mi-cuenta')
+  /*
+    Los destinos que puede ver quien entró. El de administración solo aparece
+    para `super_admin`: el resto no puede usarlo y ofrecerlo sería llevarles a
+    un 403.
+  */
+  const esAdmin = usuario?.role === 'super_admin'
+  const visibles = DESTINOS.filter(
+    (d) => (!d.soloAdmin || esAdmin) && (!d.soloCliente || !esAdmin),
+  )
+  const principales = visibles.filter((d) => d.a !== '/mi-cuenta')
+  const cuenta = visibles.find((d) => d.a === '/mi-cuenta')
 
   return (
     <motion.div
       {...aparece()}
-      className="flex 'w-[88px]' shrink-0 flex-col items-center gap-4 'xl:w-[232px]'"
+      className="sticky top-5 flex h-[calc(100dvh-3.25rem)] `w-[88px]` shrink-0 flex-col items-center gap-4 self-start md:top-6 md:h-[calc(100dvh-3.5rem)] `xl:w-[232px]`"
     >
       <p
-        className="grid size-12 shrink-0 place-items-center rounded-full bg-lavanda-200 font-titulo text-nota-mayor font-semibold text-lavanda-950 xl:size-16 xl:text-cuerpo-amplio"
+        className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-lavanda-200 font-titulo text-nota-mayor font-semibold text-lavanda-950 xl:size-16 xl:text-cuerpo-amplio"
         title={nombre}
       >
         <span className="sr-only">{nombre ?? 'Tu cuenta'}</span>
-        <span aria-hidden>{iniciales(nombre)}</span>
+        {/*
+          Con foto, la foto; sin foto, las iniciales. El fondo lavanda se queda
+          debajo en los dos casos: mientras la imagen carga, el círculo ya está
+          ahí y la columna no da un salto.
+
+          `alt=""` porque el nombre ya lo lee el `sr-only` de arriba: repetirlo
+          haría que un lector de pantalla dijera dos veces lo mismo.
+        */}
+        {foto ? (
+          <img src={foto} alt="" className="size-full object-cover" />
+        ) : (
+          <span aria-hidden>{iniciales(nombre)}</span>
+        )}
       </p>
 
       <nav
         aria-label="Navegación del panel"
-        className="vidrio-transparente flex w-full flex-1 flex-col gap-1 rounded-maximo p-3 xl:p-4 "
+        className="vidrio-secundario flex w-full shadow-lg flex-1 flex-col gap-1 rounded-maximo p-3 xl:p-4 "
       >
         <div className="flex items-center justify-center gap-2.5 px-1 pt-1 pb-5 xl:justify-start">
           <a href="#inicio" className="flex items-center gap-1" aria-label="Bolsillo, inicio">
@@ -104,18 +123,69 @@ export function NavLateral() {
         </a>
         </div>
 
-        <Boton
-          onClick={abrirGasto}
-          variante="cta"
-          title="Anotar un gasto"
-          tamano="pequeno"
-          className="mb-5 w-full px-0! xl:px-6!"
-        >
-          <span className="xl:hidden" aria-hidden>
-            +
-          </span>
-          <span className="sr-only xl:not-sr-only">Anotar un gasto</span>
-        </Boton>
+        {/*
+          Las dos acciones de anotar, juntas y en ese orden.
+
+          El gasto va lleno y el ingreso con borde a propósito: anotar un gasto
+          es lo que se hace varias veces al día y el ingreso una o dos veces al
+          mes. Si los dos fueran botones llenos competirían y la columna dejaría
+          de tener una acción principal clara.
+
+          Por debajo de 1280 la barra se queda en 88px y no cabe el rótulo: se
+          muestra solo el signo, y el texto sigue ahí para los lectores de
+          pantalla y en la pista al pasar el ratón.
+        */}
+        {/*
+          Las acciones de anotar no aparecen para `super_admin`: quien entra a
+          administrar la plataforma no viene a apuntar sus propios gastos, y
+          tres botones que no va a usar son lo primero que se lee de la columna.
+        */}
+        {!esAdmin && (
+        <div className="mb-5 flex w-full flex-col gap-2">
+          {/*
+            Mover a ahorro no es anotar: el dinero no entra ni sale, cambia de
+            bolsillo. Va el tercero porque es lo que menos se hace de los tres.
+          */}
+          <Boton
+            onClick={abrirAhorro}
+            variante="cta"
+            title="Mover a ahorro"
+            tamano="pequeno"
+            className="w-full px-0! xl:px-6! bg-lavanda-600 hover:bg-lavanda-500"
+          >
+            <span className="xl:hidden" aria-hidden>
+              ↑
+            </span>
+            <span className="sr-only xl:not-sr-only">Mover a ahorro</span>
+          </Boton>
+
+          <Boton
+            onClick={abrirIngreso}
+            variante="cta"
+            title="Registrar un ingreso"
+            tamano="pequeno"
+            className="w-full px-0! xl:px-6! bg-marca-700 hover:bg-tinta-400"
+          >
+            <span className="xl:hidden" aria-hidden>
+              +
+            </span>
+            <span className="sr-only xl:not-sr-only">Registrar un ingreso</span>
+          </Boton>
+
+          <Boton
+            onClick={abrirGasto}
+            variante="cta"
+            title="Anotar un gasto"
+            tamano="pequeno"
+            className="w-full px-0! xl:px-6! bg-marca-700 hover:bg-tinta-400"
+          >
+            <span className="xl:hidden" aria-hidden>
+              −
+            </span>
+            <span className="sr-only xl:not-sr-only">Anotar un gasto</span>
+          </Boton>
+        </div>
+        )}
 
         {principales.map((d, i) => (
           <motion.div key={d.a} {...aparece(0.06 + i * escalonado)}>
@@ -131,6 +201,7 @@ export function NavLateral() {
             <Enlace {...cuenta} />
           </motion.div>
         )}
+
       </nav>
     </motion.div>
   )

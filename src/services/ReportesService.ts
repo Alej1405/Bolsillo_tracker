@@ -1,15 +1,16 @@
 import { api } from '@/services/api'
 import {
   AnualAPIResponseSchema,
+  RendimientoAPIResponseSchema,
   RepartoAPIResponseSchema,
   ResumenAPIResponseSchema,
 } from '@/utils/reportes-schema'
-import type { Anual, Reparto, Resumen } from '@/types'
+import type { Anual, Rendimiento, Reparto, Resumen } from '@/types'
 
 /*
   Llamadas a /reports del backend.
 
-  Los cuatro reportes llegan calculados: totales, porcentajes y series. El
+  Los cinco reportes llegan calculados: totales, porcentajes y series. El
   frontend los pinta y los formatea, nunca los deriva — es la regla del
   proyecto, y además el backend puede aplicar reglas que aquí no se conocen.
 
@@ -58,4 +59,18 @@ export async function obtenerAnual(anio?: number): Promise<Anual> {
     params: anio ? { year: anio } : undefined,
   })
   return AnualAPIResponseSchema.parse(data)
+}
+
+/**
+ * Cómo va el dinero en un rango: seis medidas de rendimiento y ahorro.
+ *
+ * Cada medida trae su frase en lenguaje llano (`reading`) y su nivel
+ * (`bien` | `atencion` | `mal`). El nombre técnico de la métrica no sale nunca
+ * a la pantalla: el backend ya la tradujo.
+ */
+export async function obtenerRendimiento(desde: string, hasta: string): Promise<Rendimiento> {
+  const { data } = await api.get('/reports/performance', {
+    params: { from: desde, to: hasta },
+  })
+  return RendimientoAPIResponseSchema.parse(data)
 }

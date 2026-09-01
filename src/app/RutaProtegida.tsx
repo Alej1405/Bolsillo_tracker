@@ -33,3 +33,39 @@ export function RutaProtegida() {
 
   return <Outlet />
 }
+
+/*
+  Lo mismo, y además con rol de administrador.
+
+  Va anidada dentro de `RutaProtegida`, así que cuando se ejecuta ya hay sesión
+  comprobada: aquí solo se mira el rol. Quien no lo tiene vuelve al panel, no a
+  /login — tiene sesión válida, lo que no tiene es permiso, y mandarlo a la
+  pantalla de entrar le haría pensar que se cayó la sesión.
+
+  Esto no protege los datos: quien llame al endpoint a mano recibirá un 403 del
+  backend igual. Evita enseñar una pantalla que solo daría errores.
+*/
+export function RutaDeCliente() {
+  const usuario = useAppStore((e) => e.usuario)
+
+  /*
+    El reverso: las pantallas de finanzas personales no son para quien
+    administra. Un `super_admin` que llegue aquí —por un enlace viejo o
+    tecleando la ruta— va a su panel en vez de ver bolsillos y gastos que no
+    vino a mirar.
+
+    Sus datos no corren peligro si entrara: son los suyos propios. Esto es
+    coherencia, no seguridad.
+  */
+  if (usuario?.role === 'super_admin') return <Navigate to="/dashboard" replace />
+
+  return <Outlet />
+}
+
+export function RutaDeAdmin() {
+  const usuario = useAppStore((e) => e.usuario)
+
+  if (usuario?.role !== 'super_admin') return <Navigate to="/dashboard" replace />
+
+  return <Outlet />
+}

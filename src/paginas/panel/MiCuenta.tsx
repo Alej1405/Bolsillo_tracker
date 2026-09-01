@@ -1,34 +1,14 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircleIcon, SignOutIcon, WarningCircleIcon } from '@phosphor-icons/react'
+import { CheckCircleIcon, SignOutIcon, UserIcon, WarningCircleIcon } from '@phosphor-icons/react'
 import { Campo } from '@/paginas/acceso'
 import { ErrorApi } from '@/services/api'
+import { Bloque } from '@/ui/Bloque'
 import { Boton } from '@/ui/Boton'
 import { Modal } from '@/ui/Modal'
+import { useCerrarSesion } from '@/helpers'
+import { urlDeMedio } from '@/utils/medios'
 import { useAppStore } from '@/stores/useAppStore'
-
-/** Bloque con título y su explicación, para no repetir la cabecera cuatro veces. */
-function Bloque({
-  titulo,
-  descripcion,
-  children,
-}: {
-  titulo: string
-  descripcion: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="flex flex-col gap-4 rounded-extra bg-fondo-superficie p-5">
-      <div className="flex flex-col gap-1">
-        <h3 className="font-titulo text-cuerpo-amplio font-semibold text-texto-principal">
-          {titulo}
-        </h3>
-        <p className="text-nota text-texto-tenue">{descripcion}</p>
-      </div>
-      {children}
-    </section>
-  )
-}
 
 /**
  * Mi cuenta: quién eres, cómo entras y cómo te vas.
@@ -44,8 +24,7 @@ export function MiCuenta() {
   const cambiarNombre = useAppStore((e) => e.cambiarNombre)
   const cambiarContrasena = useAppStore((e) => e.cambiarContrasena)
   const darDeBaja = useAppStore((e) => e.darDeBajaMiCuenta)
-  const salir = useAppStore((e) => e.salir)
-  const limpiarDashboard = useAppStore((e) => e.limpiarDashboard)
+  const cerrarSesion = useCerrarSesion()
 
   const [nombre, setNombre] = useState(usuario?.full_name ?? '')
   const [errorNombre, setErrorNombre] = useState<string | null>(null)
@@ -55,6 +34,12 @@ export function MiCuenta() {
   const [nueva, setNueva] = useState('')
   const [errorClave, setErrorClave] = useState<{ actual?: string; nueva?: string }>({})
   const [claveLista, setClaveLista] = useState(false)
+
+  const cambiarFoto = useAppStore((e) => e.cambiarFoto)
+  const quitarMiFoto = useAppStore((e) => e.quitarMiFoto)
+  const eligeArchivo = useRef<HTMLInputElement>(null)
+  const [errorFoto, setErrorFoto] = useState<string | null>(null)
+  const foto = urlDeMedio(usuario?.avatar_url)
 
   const [bajaAbierta, setBajaAbierta] = useState(false)
   const [errorBaja, setErrorBaja] = useState<string | null>(null)
@@ -108,10 +93,31 @@ export function MiCuenta() {
     }
   }
 
-  const cerrarSesion = () => {
-    limpiarDashboard()
-    salir()
-    navegar('/login', { replace: true })
+  const alElegirFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const archivo = e.target.files?.[0]
+    /*
+      El input se vacía siempre, incluso si la subida falla. Sin esto, elegir
+      el mismo archivo otra vez no dispara `change` —el valor no cambió— y el
+      segundo intento se queda sin hacer nada.
+    */
+    e.target.value = ''
+    if (!archivo) return
+
+    setErrorFoto(null)
+    try {
+      await cambiarFoto(archivo)
+    } catch (error) {
+      setErrorFoto(error instanceof Error ? error.message : 'No pudimos subir la foto.')
+    }
+  }
+
+  const alQuitarFoto = async () => {
+    setErrorFoto(null)
+    try {
+      await quitarMiFoto()
+    } catch (error) {
+      setErrorFoto(error instanceof Error ? error.message : 'No pudimos quitar la foto.')
+    }
   }
 
   const confirmarBaja = async () => {
@@ -132,6 +138,64 @@ export function MiCuenta() {
           {usuario?.email ?? 'Sin sesión'}
         </p>
       </div>
+
+      <Bloque
+        titulo="Tu foto"
+        descripcion="Aparece en la barra lateral. Es opcional: sin foto se muestran tus iniciales."
+      >
+        <div className="flex flex-wrap items-center gap-5">
+          <span className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-full bg-lavanda-200 text-lavanda-950">
+            {foto ? (
+              <img src={foto} alt="Tu foto de perfil" className="size-full object-cover" />
+            ) : (
+              <UserIcon size={28} aria-hidden />
+            )}
+          </span>
+
+          <div className="flex flex-1 flex-col gap-3">
+            <div className="flex flex-wrap gap-3">
+              {/*
+                El input de archivo va escondido y lo dispara el botón: el
+                control nativo no se puede maquetar y se ve distinto en cada
+                navegador. `accept` filtra el diálogo, pero quien manda es el
+                backend, que mira los bytes del archivo.
+              */}
+              <input
+                ref={eligeArchivo}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => void alElegirFoto(e)}
+                className="hidden"
+              />
+              <Boton
+                variante="secundario"
+                tamano="mediano"
+                disabled={guardando}
+                onClick={() => eligeArchivo.current?.click()}
+              >
+                {guardando ? 'Subiendo…' : foto ? 'Cambiar foto' : 'Subir foto'}
+              </Boton>
+              {foto && (
+                <Boton
+                  variante="secundario"
+                  tamano="mediano"
+                  disabled={guardando}
+                  onClick={() => void alQuitarFoto()}
+                >
+                  Quitar
+                </Boton>
+              )}
+            </div>
+            <p className="text-nota text-texto-tenue">JPG, PNG o WEBP, hasta 2 MB.</p>
+          </div>
+        </div>
+
+        {errorFoto && (
+          <p role="alert" className="rounded-medio bg-gasto-sutil px-4 py-3 text-nota text-gasto">
+            {errorFoto}
+          </p>
+        )}
+      </Bloque>
 
       <div className="grid gap-5 xl:grid-cols-2">
         <Bloque titulo="Tu nombre" descripcion="Es lo que aparece en el panel.">

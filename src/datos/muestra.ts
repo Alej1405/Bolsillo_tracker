@@ -111,3 +111,11 @@ export const asuntos: Asunto[] = [
   { id: 'asu-idea', texto: 'Tengo una idea para la aplicación' },
   { id: 'asu-otro', texto: 'Otro asunto' },
 ]
+
+/*
+  Los tres videos de la sección de TikToks, por su opacidad.
+
+  Son marcadores mientras no haya videos reales. Están aquí porque los usan la
+  landing y la versión de celular, y tenían una copia cada una.
+*/
+export const videos = [0.3, 0.5, 0.7]

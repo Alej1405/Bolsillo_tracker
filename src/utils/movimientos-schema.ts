@@ -11,8 +11,16 @@ import { CategoriaMiniSchema, CuentaMiniSchema, TipoMovimientoSchema } from '@/u
 */
 
 /** Lo que se envía al anotar un gasto. Los cinco campos son obligatorios. */
+/*
+  Un movimiento simple: un gasto o un ingreso. Los dos tienen exactamente los
+  mismos campos —cuánto, de qué bolsillo, en qué categoría, cuándo— y solo se
+  distinguen por `type`, así que comparten schema.
+
+  Las transferencias no entran aquí: necesitan cuenta de destino y no llevan
+  categoría, y el backend las valida con otras reglas.
+*/
 export const AnotarGastoSchema = z.object({
-  type: z.literal('expense'),
+  type: z.enum(['expense', 'income']),
   /*
     El backend acepta número o string y valida con su propio patrón: hasta 12
     enteros y 2 decimales, con punto. La coma del teclado en español se traduce

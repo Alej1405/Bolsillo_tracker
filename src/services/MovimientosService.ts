@@ -36,26 +36,31 @@ export type FiltrosMovimientos = {
 */
 
 /**
- * Anota un gasto y devuelve el movimiento guardado.
+ * Anota un gasto o un ingreso y devuelve el movimiento guardado.
  *
- * Solo gastos: ingresos y transferencias son otras dos operaciones con sus
- * propias reglas —una transferencia necesita cuenta de origen y destino— y
- * mezclarlas en una sola función acabaría en un cuerpo lleno de condicionales.
+ * Los dos van al mismo endpoint con el mismo cuerpo: lo único que cambia es
+ * `type`, y el backend hace el resto —restar o sumar al saldo, contarlo en un
+ * reporte o en el otro—. Aquí no se decide nada de eso.
+ *
+ * Las transferencias no pasan por aquí: `transferir` tiene su propio endpoint
+ * porque necesita cuenta de destino y no lleva categoría.
  */
-export async function anotarGasto(datos: DatosAnotarGasto): Promise<MovimientoCompleto> {
+export async function anotarMovimiento(datos: DatosAnotarGasto): Promise<MovimientoCompleto> {
   const cuerpo = AnotarGastoSchema.parse(datos)
   const { data } = await api.post('/transactions', cuerpo)
   return MovimientoAPIResponseSchema.parse(data)
 }
 
 /**
- * Catálogo de categorías de gasto.
+ * Catálogo de categorías de un tipo.
  *
  * Delega en `CategoriasService`, que es donde vive /categories. Se mantiene
- * aquí como atajo porque anotar un gasto siempre necesita este catálogo.
+ * aquí como atajo porque anotar un movimiento siempre necesita su catálogo, y
+ * son dos distintos: en un gasto se elige en qué se fue, en un ingreso de dónde
+ * vino.
  */
-export async function listarCategoriasDeGasto(): Promise<Categoria[]> {
-  return listarCategorias('expense')
+export async function listarCategoriasDe(tipo: 'expense' | 'income'): Promise<Categoria[]> {
+  return listarCategorias(tipo)
 }
 
 /**

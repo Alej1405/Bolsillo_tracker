@@ -65,3 +65,30 @@ export const AnualAPIResponseSchema = z.object({
   year: z.number(),
   items: z.array(MesSchema),
 })
+
+/*
+  Una medida de rendimiento. El backend no manda solo el número: manda además
+  la frase ya redactada (`reading`) y el semáforo (`level`). Aquí no se
+  interpreta nada, se pinta lo que llega — es la misma regla de siempre: el
+  backend calcula, el frontend formatea.
+
+  `value` llega como texto cuando es dinero y como número cuando es un
+  porcentaje o una cantidad de meses. El dinero viaja en texto para que no lo
+  redondee el punto flotante.
+*/
+export const MedidaSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  value: z.union([z.string(), z.number()]),
+  unit: z.string(),
+  reading: z.string(),
+  level: z.enum(['bien', 'atencion', 'mal']),
+})
+
+/** GET /reports/performance — cómo va el dinero, en seis medidas. */
+export const RendimientoAPIResponseSchema = z.object({
+  period: PeriodoSchema,
+  saved_in_period: z.string(),
+  net_worth: z.string(),
+  metrics: z.array(MedidaSchema),
+})

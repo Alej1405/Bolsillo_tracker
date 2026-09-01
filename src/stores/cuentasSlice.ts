@@ -2,6 +2,7 @@ import type { StateCreator } from 'zustand'
 import {
   actualizarCuenta,
   archivarCuenta,
+  desarchivarCuenta,
   borrarCuenta,
   crearCuenta,
   listarCuentas,
@@ -40,6 +41,7 @@ export type CuentasSliceType = {
   crearBolsillo: (datos: DatosCrearCuenta) => Promise<Cuenta>
   editarBolsillo: (id: string, datos: DatosActualizarCuenta) => Promise<Cuenta>
   archivarBolsillo: (id: string) => Promise<void>
+  desarchivarBolsillo: (id: string, incluirArchivados?: boolean) => Promise<void>
   borrarBolsillo: (id: string) => Promise<void>
   descartarBolsilloCreado: () => void
   abrirCrearBolsillo: () => void
@@ -100,6 +102,21 @@ export const createCuentasSlice: StateCreator<CuentasSliceType> = (set, get) => 
     try {
       await archivarCuenta(id)
       await get().cargarBolsillos()
+    } finally {
+      set({ guardandoBolsillo: false })
+    }
+  },
+
+  /*
+    Recibe `incluirArchivados` porque se desarchiva mirando la lista de
+    archivados: si recargáramos sin el filtro, la vista se vaciaría de golpe
+    justo cuando la persona acaba de actuar sobre ella.
+  */
+  desarchivarBolsillo: async (id, incluirArchivados = false) => {
+    set({ guardandoBolsillo: true })
+    try {
+      await desarchivarCuenta(id)
+      await get().cargarBolsillos(incluirArchivados)
     } finally {
       set({ guardandoBolsillo: false })
     }

@@ -1,15 +1,17 @@
 import type { StateCreator } from 'zustand'
 import {
   actualizarMovimiento,
-  anotarGasto,
+  anotarMovimiento,
   borrarMovimiento,
-  listarCategoriasDeGasto,
+  listarCategoriasDe,
   listarMovimientos,
   transferir,
 } from '@/services/MovimientosService'
 import type { FiltrosMovimientos } from '@/services/MovimientosService'
 import type {
   Categoria,
+  TipoAnotable,
+  TipoPopup,
   DatosActualizarMovimiento,
   DatosAnotarGasto,
   DatosTransferir,
@@ -29,45 +31,60 @@ import type {
   que no cambia mientras la persona anota un gasto.
 */
 export type MovimientosSliceType = {
-  categorias: Categoria[]
+  /*
+    Los catálogos, uno por tipo. Son dos listas distintas —"Alimentación" es de
+    gasto, "Sueldo" es de ingreso— y guardarlas juntas obligaría a filtrar en
+    cada pantalla.
+  */
+  categorias: Record<TipoAnotable, Categoria[]>
   cargandoCategorias: boolean
   errorCategorias: string | null
   anotando: boolean
   /** Si el popup de anotar un gasto está abierto. */
-  gastoAbierto: boolean
+  /*
+    Qué popup de anotar está abierto, o `null` si ninguno. Guarda el tipo y no
+    un booleano porque el formulario es el mismo para gasto e ingreso: lo que
+    cambia son los textos y el catálogo, y los saca de aquí.
+  */
+  movimientoAbierto: TipoPopup | null
 
   /** Historial paginado. Lo filtra y pagina el backend. */
   historial: ListaMovimientos | null
   cargandoHistorial: boolean
   errorHistorial: string | null
 
-  cargarCategorias: () => Promise<void>
+  cargarCategorias: (tipo?: TipoAnotable) => Promise<void>
   anotar: (datos: DatosAnotarGasto) => Promise<MovimientoCompleto>
   cargarHistorial: (filtros?: FiltrosMovimientos) => Promise<void>
   editarMovimiento: (id: string, datos: DatosActualizarMovimiento) => Promise<MovimientoCompleto>
   borrarMovimiento: (id: string) => Promise<void>
   pasarPlata: (datos: DatosTransferir) => Promise<MovimientoCompleto>
   abrirGasto: () => void
-  cerrarGasto: () => void
+  abrirIngreso: () => void
+  abrirAhorro: () => void
+  cerrarMovimiento: () => void
 }
 
 export const createMovimientosSlice: StateCreator<MovimientosSliceType> = (set, get) => ({
-  categorias: [],
+  categorias: { expense: [], income: [] },
   cargandoCategorias: false,
   errorCategorias: null,
   anotando: false,
-  gastoAbierto: false,
+  movimientoAbierto: null,
 
-  abrirGasto: () => set({ gastoAbierto: true }),
-  cerrarGasto: () => set({ gastoAbierto: false }),
+  abrirGasto: () => set({ movimientoAbierto: 'expense' }),
+  abrirIngreso: () => set({ movimientoAbierto: 'income' }),
+  abrirAhorro: () => set({ movimientoAbierto: 'transfer' }),
+  cerrarMovimiento: () => set({ movimientoAbierto: null }),
 
-  cargarCategorias: async () => {
-    // Ya están: no se vuelve a pedir un catálogo que no cambia.
-    if (get().categorias.length > 0) return
+  cargarCategorias: async (tipo = 'expense') => {
+    // Ya está: no se vuelve a pedir un catálogo que no cambia.
+    if (get().categorias[tipo].length > 0) return
 
     set({ cargandoCategorias: true, errorCategorias: null })
     try {
-      set({ categorias: await listarCategoriasDeGasto() })
+      const items = await listarCategoriasDe(tipo)
+      set({ categorias: { ...get().categorias, [tipo]: items } })
     } catch (error) {
       set({
         errorCategorias:
@@ -81,7 +98,7 @@ export const createMovimientosSlice: StateCreator<MovimientosSliceType> = (set, 
   anotar: async (datos) => {
     set({ anotando: true })
     try {
-      return await anotarGasto(datos)
+      return await anotarMovimiento(datos)
     } finally {
       set({ anotando: false })
     }

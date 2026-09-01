@@ -2,46 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Esperando } from '@/layout/panel/Esperando'
 import { GraficoEntroSalio, GraficoMesAMes, GraficoReparto } from '@/piezas'
 import { Boton } from '@/ui/Boton'
-import { aNumero, conSimbolo } from '@/utils/moneda'
+import { Cifra } from '@/ui/Cifra'
+import { MESES, control, rangoDelMes, ultimosAnios } from '@/helpers'
+import { aNumero } from '@/utils/moneda'
 import { useAppStore } from '@/stores/useAppStore'
-
-/** Primer y último día de un mes, como "2026-08-01" y "2026-08-31". */
-function rangoDelMes(anio: number, mes: number): { desde: string; hasta: string } {
-  const dd = (n: number) => String(n).padStart(2, '0')
-  const ultimo = new Date(anio, mes, 0).getDate()
-  return { desde: `${anio}-${dd(mes)}-01`, hasta: `${anio}-${dd(mes)}-${dd(ultimo)}` }
-}
-
-const MESES = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
-]
-
-const foco =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-borde-foco'
-const control = `h-11 rounded-grande border border-borde-fuerte bg-fondo-superficie px-3 text-nota text-texto-principal outline-none ${foco}`
-
-/** Una cifra del resumen, con su etiqueta. */
-function Cifra({
-  etiqueta,
-  monto,
-  tono = 'neutro',
-}: {
-  etiqueta: string
-  monto?: string
-  tono?: 'ingreso' | 'gasto' | 'neutro'
-}) {
-  const color =
-    tono === 'ingreso' ? 'text-ingreso' : tono === 'gasto' ? 'text-gasto' : 'text-texto-principal'
-  return (
-    <div className="flex flex-col gap-1 rounded-extra bg-fondo-superficie p-5">
-      <p className="text-micro tracking-[0.08em] text-texto-tenue uppercase">{etiqueta}</p>
-      <p className={`font-cuerpo text-titulo-menor font-bold tabular-nums ${color}`}>
-        {conSimbolo(monto)}
-      </p>
-    </div>
-  )
-}
 
 /**
  * Reportes: qué pasó en un periodo.
@@ -91,10 +55,10 @@ export function Reportes() {
     color: c.category.color ?? `var(--color-grafico-${(i % 5) + 1})`,
   }))
 
-  const anios = Array.from({ length: 5 }, (_, i) => hoy.getFullYear() - i)
+  const anios = ultimosAnios()
 
   return (
-    <section className="vidrio flex flex-1 flex-col gap-5 rounded-maximo p-5 md:p-6">
+    <section className="vidrio-transparente flex flex-1 flex-col gap-5 rounded-maximo p-5 md:p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-titulo text-titulo-menor font-bold text-texto-principal">Reportes</h2>

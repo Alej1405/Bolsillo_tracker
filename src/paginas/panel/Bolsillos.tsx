@@ -1,17 +1,11 @@
 import { useEffect, useState } from 'react'
-import {
-  ArchiveIcon,
-  CheckCircleIcon,
-  PencilSimpleIcon,
-  PlusIcon,
-  TrashIcon,
-} from '@phosphor-icons/react'
-import { FormularioBolsillo, etiquetaDe, iconoDe } from '@/paginas/panel/FormularioBolsillo'
+import { CheckCircleIcon, PlusIcon } from '@phosphor-icons/react'
+import { FormularioBolsillo } from '@/paginas/panel/FormularioBolsillo'
+import { TarjetaBolsilloPanel } from '@/piezas'
 import { ErrorApi } from '@/services/api'
 import { Boton } from '@/ui/Boton'
 import { Modal } from '@/ui/Modal'
-import { Pista } from '@/ui/Pista'
-import { conSimbolo, enContra } from '@/utils/moneda'
+import { conSimbolo } from '@/utils/moneda'
 import { useAppStore } from '@/stores/useAppStore'
 import type { Cuenta } from '@/types'
 
@@ -21,87 +15,6 @@ type Dialogo =
   | { tipo: 'borrar'; bolsillo: Cuenta }
   | null
 
-const ACCION =
-  'grid size-11 place-items-center rounded-medio border border-borde-fuerte bg-fondo-superficie text-texto-secundario transition-colors hover:bg-fondo-sutil focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-borde-foco active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none'
-
-/** Una tarjeta de la lista: qué es, cuánto tiene y qué se puede hacer con él. */
-function Tarjeta({
-  bolsillo,
-  onEditar,
-  onArchivar,
-  onBorrar,
-  ocupado,
-}: {
-  bolsillo: Cuenta
-  onEditar: () => void
-  onArchivar: () => void
-  onBorrar: () => void
-  ocupado: boolean
-}) {
-  const Icono = iconoDe(bolsillo.type)
-  const archivado = Boolean(bolsillo.archived_at)
-  const negativo = enContra(bolsillo.balance)
-
-  return (
-    <article
-      className={`flex flex-col gap-4 rounded-extra bg-fondo-superficie p-5 ${
-        archivado ? 'opacity-60' : ''
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <span className="grid size-9 shrink-0 place-items-center rounded-medio bg-fondo-sutil text-texto-secundario">
-          <Icono size={18} aria-hidden />
-        </span>
-        <div className="min-w-0 flex-1">
-          {/* `truncate`: los nombres los pone el usuario y pueden ser largos. */}
-          <p className="truncate text-cuerpo font-semibold text-texto-principal">{bolsillo.name}</p>
-          <p className="text-micro tracking-[0.08em] text-texto-tenue uppercase">
-            {etiquetaDe(bolsillo.type)}
-            {archivado && ' · archivado'}
-          </p>
-        </div>
-      </div>
-
-      <p
-        className={`font-cuerpo text-titulo-menor font-bold tabular-nums ${
-          negativo ? 'text-gasto' : 'text-texto-principal'
-        }`}
-      >
-        {conSimbolo(bolsillo.balance)}
-      </p>
-
-      <div className="flex items-center gap-2">
-        <Pista texto="Editar">
-          <button type="button" onClick={onEditar} disabled={ocupado} className={ACCION}>
-            <PencilSimpleIcon size={18} aria-hidden />
-            <span className="sr-only">Editar {bolsillo.name}</span>
-          </button>
-        </Pista>
-
-        {!archivado && (
-          <Pista texto="Archivar">
-            <button type="button" onClick={onArchivar} disabled={ocupado} className={ACCION}>
-              <ArchiveIcon size={18} aria-hidden />
-              <span className="sr-only">Archivar {bolsillo.name}</span>
-            </button>
-          </Pista>
-        )}
-
-        <Pista texto="Borrar">
-          <button
-            type="button"
-            onClick={onBorrar}
-            disabled={ocupado}
-            className={`${ACCION} hover:border-gasto hover:text-gasto`}
-          >
-            <TrashIcon size={18} aria-hidden />
-            <span className="sr-only">Borrar {bolsillo.name}</span>
-          </button>
-        </Pista>
-      </div>
-    </article>
-  )
-}
 
 /**
  * Pantalla de bolsillos: crear, ver, editar, archivar y borrar.
@@ -120,6 +33,7 @@ export function Bolsillos() {
   const ocupado = useAppStore((e) => e.guardandoBolsillo)
   const cargar = useAppStore((e) => e.cargarBolsillos)
   const archivar = useAppStore((e) => e.archivarBolsillo)
+  const desarchivar = useAppStore((e) => e.desarchivarBolsillo)
   const borrar = useAppStore((e) => e.borrarBolsillo)
   const cargarDashboard = useAppStore((e) => e.cargarDashboard)
   const abrirCrearBolsillo = useAppStore((e) => e.abrirCrearBolsillo)
@@ -155,6 +69,18 @@ export function Bolsillos() {
       refrescarTodo()
     } catch (e) {
       setAviso(e instanceof Error ? e.message : 'No pudimos archivar el bolsillo.')
+    }
+  }
+
+  const alDesarchivar = async (bolsillo: Cuenta) => {
+    setAviso(null)
+    try {
+      /* Se pasa `verArchivados` para que la lista no se vacíe bajo el cursor. */
+      await desarchivar(bolsillo.id, verArchivados)
+      setAviso(`«${bolsillo.name}» volvió. Ya cuenta otra vez en tu patrimonio.`)
+      refrescarTodo()
+    } catch (e) {
+      setAviso(e instanceof Error ? e.message : 'No pudimos desarchivar el bolsillo.')
     }
   }
 
@@ -245,12 +171,13 @@ export function Bolsillos() {
       ) : bolsillos.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {bolsillos.map((b) => (
-            <Tarjeta
+            <TarjetaBolsilloPanel
               key={b.id}
               bolsillo={b}
               ocupado={ocupado}
               onEditar={() => setDialogo({ tipo: 'editar', bolsillo: b })}
               onArchivar={() => void alArchivar(b)}
+              onDesarchivar={() => void alDesarchivar(b)}
               onBorrar={() => setDialogo({ tipo: 'borrar', bolsillo: b })}
             />
           ))}

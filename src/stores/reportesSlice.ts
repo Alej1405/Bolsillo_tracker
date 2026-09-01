@@ -1,6 +1,11 @@
 import type { StateCreator } from 'zustand'
-import { obtenerAnual, obtenerReparto, obtenerResumen } from '@/services/ReportesService'
-import type { Anual, Reparto, Resumen } from '@/types'
+import {
+  obtenerAnual,
+  obtenerRendimiento,
+  obtenerReparto,
+  obtenerResumen,
+} from '@/services/ReportesService'
+import type { Anual, Rendimiento, Reparto, Resumen } from '@/types'
 
 /*
   Estado de los reportes.
@@ -20,9 +25,19 @@ export type ReportesSliceType = {
   cargandoReportes: boolean
   errorReportes: string | null
 
+  /*
+    El rendimiento lleva su propio cargando y su propio error, y no los de los
+    otros tres reportes: vive en otra pantalla del nav. Compartirlos haría que
+    un fallo suyo apareciera en Reportes, donde nadie pidió nada.
+  */
+  rendimiento: Rendimiento | null
+  cargandoRendimiento: boolean
+  errorRendimiento: string | null
+
   cargarResumen: (desde: string, hasta: string, cuentaId?: string) => Promise<void>
   cargarReparto: (desde: string, hasta: string, tipo?: 'income' | 'expense') => Promise<void>
   cargarAnual: (anio?: number) => Promise<void>
+  cargarRendimiento: (desde: string, hasta: string) => Promise<void>
 }
 
 const mensaje = (e: unknown) =>
@@ -34,6 +49,10 @@ export const createReportesSlice: StateCreator<ReportesSliceType> = (set) => ({
   anual: null,
   cargandoReportes: false,
   errorReportes: null,
+
+  rendimiento: null,
+  cargandoRendimiento: false,
+  errorRendimiento: null,
 
   cargarResumen: async (desde, hasta, cuentaId) => {
     set({ cargandoReportes: true, errorReportes: null })
@@ -65,6 +84,17 @@ export const createReportesSlice: StateCreator<ReportesSliceType> = (set) => ({
       set({ errorReportes: mensaje(e) })
     } finally {
       set({ cargandoReportes: false })
+    }
+  },
+
+  cargarRendimiento: async (desde, hasta) => {
+    set({ cargandoRendimiento: true, errorRendimiento: null })
+    try {
+      set({ rendimiento: await obtenerRendimiento(desde, hasta) })
+    } catch (e) {
+      set({ errorRendimiento: mensaje(e) })
+    } finally {
+      set({ cargandoRendimiento: false })
     }
   },
 })

@@ -27,3 +27,11 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# Herramientas de revisión visual — no hacen falta para que el proyecto funcione
+shot.mjs
+.capturas/
+playwright-report/
+test-results/
+blob-report/
+.playwright/

@@ -1,22 +1,6 @@
 import { Revelar } from '@/movimiento'
+import { pasos } from '@/datos'
 
-const pasos = [
-  {
-    titulo: 'Crea tus bolsillos',
-    cuerpo:
-      'Efectivo, banco, tarjeta y ahorro. Pones el saldo con el que arrancas y ya está listo para usarse.',
-  },
-  {
-    titulo: 'Registra lo que pasa',
-    cuerpo:
-      'Cada gasto o ingreso entra con su categoría y su bolsillo. No hay formularios largos ni campos obligatorios de más.',
-  },
-  {
-    titulo: 'Lee tus reportes',
-    cuerpo:
-      'La aplicación arma el reparto por categoría, el mes a mes y lo que te queda disponible. Tú solo lees.',
-  },
-]
 
 export function SeccionComoFunciona() {
   return (

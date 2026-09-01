@@ -1,6 +1,12 @@
 import type { StateCreator } from 'zustand'
 import { registrar, iniciarSesion, obtenerPerfil, cerrarSesion } from '@/services/AuthService'
-import { actualizarPerfil, cambiarClave, darseDeBaja } from '@/services/UsuariosService'
+import {
+  actualizarPerfil,
+  cambiarClave,
+  darseDeBaja,
+  quitarFoto,
+  subirFoto,
+} from '@/services/UsuariosService'
 import type {
   DatosActualizarPerfil,
   DatosCambiarClave,
@@ -37,6 +43,8 @@ export type AuthSliceType = {
   guardandoPerfil: boolean
   cambiarNombre: (datos: DatosActualizarPerfil) => Promise<Usuario>
   cambiarContrasena: (datos: DatosCambiarClave) => Promise<void>
+  cambiarFoto: (archivo: File) => Promise<Usuario>
+  quitarMiFoto: () => Promise<Usuario>
   darDeBajaMiCuenta: () => Promise<void>
 }
 
@@ -85,6 +93,33 @@ export const createAuthSlice: StateCreator<AuthSliceType> = (set) => ({
     set({ guardandoPerfil: true })
     try {
       const usuario = await actualizarPerfil(datos)
+      set({ usuario })
+      return usuario
+    } finally {
+      set({ guardandoPerfil: false })
+    }
+  },
+
+  /*
+    Las dos guardan el usuario que devuelve el backend en vez de tocar solo la
+    foto: la respuesta es la ficha completa y ya trae la ruta nueva, así que la
+    barra lateral y Mi cuenta se actualizan solas sin pedir el perfil otra vez.
+  */
+  cambiarFoto: async (archivo) => {
+    set({ guardandoPerfil: true })
+    try {
+      const usuario = await subirFoto(archivo)
+      set({ usuario })
+      return usuario
+    } finally {
+      set({ guardandoPerfil: false })
+    }
+  },
+
+  quitarMiFoto: async () => {
+    set({ guardandoPerfil: true })
+    try {
+      const usuario = await quitarFoto()
       set({ usuario })
       return usuario
     } finally {

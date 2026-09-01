@@ -28,6 +28,8 @@ import {
 } from '@/utils/movimientos-schema'
 import {
   AnualAPIResponseSchema,
+  MedidaSchema,
+  RendimientoAPIResponseSchema,
   RepartoAPIResponseSchema,
   ResumenAPIResponseSchema,
 } from '@/utils/reportes-schema'
@@ -35,6 +37,7 @@ import {
   ActualizarPerfilSchema,
   CambiarClaveSchema,
   ListaUsuariosAPIResponseSchema,
+  UsuarioAdminAPIResponseSchema,
 } from '@/utils/auth-schema'
 import {
   ActualizarCuentaSchema,
@@ -49,6 +52,25 @@ import type {
   RegistroSchema,
   UsuarioAPIResponseSchema,
 } from '@/utils/auth-schema'
+import { AdminStatsAPIResponseSchema } from '@/utils/admin-schema'
+import {
+  AbrirHiloSchema,
+  ContactarSchema,
+  HiloAPIResponseSchema,
+  HiloAdminAPIResponseSchema,
+  ListaHilosAPIResponseSchema,
+  MensajeAPIResponseSchema,
+  ResponderSchema,
+} from '@/utils/soporte-schema'
+import {
+  ActualizarContactoSchema,
+  ContactoAPIResponseSchema,
+  TiktokAutorizacionAPIResponseSchema,
+  TiktokCredencialesSchema,
+  TiktokEstadoAPIResponseSchema,
+  TiktokSincronizadoAPIResponseSchema,
+  VideoAPIResponseSchema,
+} from '@/utils/sitio-schema'
 
 // ─── Autenticación ───────────────────────────────────────────────────────────
 
@@ -60,6 +82,8 @@ export type DatosLogin = z.infer<typeof LoginSchema>
 
 /** Usuario tal como lo devuelve la API. */
 export type Usuario = z.infer<typeof UsuarioAPIResponseSchema>
+/** Qué puede hacer quien entró. Lo decide el backend; aquí solo se lee. */
+export type Rol = Usuario['role']
 
 /** Respuesta de registro y de login: usuario + token. */
 export type RespuestaAcceso = z.infer<typeof AccesoAPIResponseSchema>
@@ -101,6 +125,21 @@ export type ListaCuentas = z.infer<typeof ListaCuentasAPIResponseSchema>
 
 /** Lo que se envía al anotar un gasto. */
 export type DatosAnotarGasto = z.infer<typeof AnotarGastoSchema>
+/*
+  Lo que se puede anotar desde el popup: un gasto o un ingreso. Es más estrecho
+  que `TipoMovimiento`, que incluye además las transferencias — esas tienen su
+  propio formulario porque piden cuenta de destino y no llevan categoría.
+*/
+export type TipoAnotable = DatosAnotarGasto['type']
+/*
+  Lo que abre el popup de anotar: un gasto, un ingreso o un paso a ahorro.
+
+  La transferencia comparte formulario con los otros dos —monto, fecha, nota y
+  el bolsillo de origen son iguales—, pero en vez de categoría pide el bolsillo
+  de destino: el backend no acepta una transferencia con categoría ni un gasto
+  sin ella.
+*/
+export type TipoPopup = TipoAnotable | 'transfer'
 
 /** Movimiento completo, tal como lo devuelve /transactions. */
 export type MovimientoCompleto = z.infer<typeof MovimientoAPIResponseSchema>
@@ -125,6 +164,8 @@ export type ListaMovimientos = z.infer<typeof ListaMovimientosAPIResponseSchema>
 export type Resumen = z.infer<typeof ResumenAPIResponseSchema>
 export type Reparto = z.infer<typeof RepartoAPIResponseSchema>
 export type Anual = z.infer<typeof AnualAPIResponseSchema>
+export type Medida = z.infer<typeof MedidaSchema>
+export type Rendimiento = z.infer<typeof RendimientoAPIResponseSchema>
 
 /** Perfil y contraseña de la propia cuenta. */
 export type DatosActualizarPerfil = z.infer<typeof ActualizarPerfilSchema>
@@ -132,8 +173,41 @@ export type DatosCambiarClave = z.infer<typeof CambiarClaveSchema>
 
 /** Página de usuarios. Solo la ve `super_admin`. */
 export type ListaUsuarios = z.infer<typeof ListaUsuariosAPIResponseSchema>
+/** Un usuario en el listado del administrador: la ficha más si está activo. */
+export type UsuarioAdmin = z.infer<typeof UsuarioAdminAPIResponseSchema>
 
 export type CuentaMini = z.infer<typeof CuentaMiniSchema>
 export type CategoriaMini = z.infer<typeof CategoriaMiniSchema>
 export type TipoCuenta = z.infer<typeof TipoCuentaSchema>
 export type TipoMovimiento = z.infer<typeof TipoMovimientoSchema>
+
+/** El estado de la plataforma. Solo lo ve `super_admin`. */
+export type AdminStats = z.infer<typeof AdminStatsAPIResponseSchema>
+
+// ── Soporte ──────────────────────────────────────────────────────────────
+
+/** Un mensaje dentro de una conversación. */
+export type Mensaje = z.infer<typeof MensajeAPIResponseSchema>
+/** Una conversación de soporte, como la ve quien la abrió. */
+export type Hilo = z.infer<typeof HiloAPIResponseSchema>
+/** Lo mismo más de quién es. Solo lo ve `super_admin`. */
+export type HiloAdmin = z.infer<typeof HiloAdminAPIResponseSchema>
+export type ListaHilos = z.infer<typeof ListaHilosAPIResponseSchema>
+/** Los tres estados: abierto, respondido, cerrado. */
+export type EstadoHilo = Hilo['status']
+export type DatosAbrirHilo = z.infer<typeof AbrirHiloSchema>
+export type DatosContactar = z.infer<typeof ContactarSchema>
+export type DatosResponder = z.infer<typeof ResponderSchema>
+
+// ── El sitio: contacto y TikTok ──────────────────────────────────────────
+
+/** Los datos de contacto que muestra la landing. */
+export type Contacto = z.infer<typeof ContactoAPIResponseSchema>
+export type DatosActualizarContacto = z.infer<typeof ActualizarContactoSchema>
+/** Cómo está la conexión con TikTok. Sin secretos. */
+export type TiktokEstado = z.infer<typeof TiktokEstadoAPIResponseSchema>
+export type TiktokSincronizado = z.infer<typeof TiktokSincronizadoAPIResponseSchema>
+export type TiktokAutorizacion = z.infer<typeof TiktokAutorizacionAPIResponseSchema>
+export type DatosTiktokCredenciales = z.infer<typeof TiktokCredencialesSchema>
+/** Un vídeo de TikTok guardado. */
+export type Video = z.infer<typeof VideoAPIResponseSchema>

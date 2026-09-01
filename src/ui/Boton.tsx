@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
 import { curva, duracion } from '@/movimiento'
 
-type Variante = 'principal' | 'destacado' | 'secundario' | 'sutil' | 'peligro' | 'cta'
+type Variante = 'principal' | 'destacado' | 'secundario' | 'sutil' | 'peligro' | 'cta' | 'salir' 
 type Tamano = 'pequeno' | 'mediano' | 'grande'
 
 type BotonProps = {
@@ -44,7 +44,9 @@ const variantes: Record<Variante, string> = {
   */
   peligro: 'rounded-nav bg-error text-texto-sobre-marca hover:bg-gasto',
   // variante para botones mas sutilies o tenues para el uso en lugares donde no es tan bueno que resalte el boton.
-  cta: 'rounded-nav bg-lavanda-600 text-leyenda hover:bg-lavanda-400 text-white',
+  cta: 'rounded-nav  text-leyenda text-white ',
+
+  salir: 'rounded-nav bg-lavanda-900 text-leyenda hover:bg-lavanda-400 text-white',
 }
 
 const tamanos: Record<Tamano, string> = {

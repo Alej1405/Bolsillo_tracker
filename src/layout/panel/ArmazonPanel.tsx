@@ -9,6 +9,7 @@ import { FormularioBolsillo } from '@/paginas/panel/FormularioBolsillo'
 import { Boton } from '@/ui/Boton'
 import { Modal } from '@/ui/Modal'
 import { useAppStore } from '@/stores/useAppStore'
+import { rangoDelMes } from '@/helpers'
 
 /*
   Armazón común de las pantallas del panel: el fondo, la barra lateral y la
@@ -29,19 +30,47 @@ export function ArmazonPanel() {
   const cargando = useAppStore((e) => e.cargandoDashboard)
   const error = useAppStore((e) => e.errorDashboard)
   const cargar = useAppStore((e) => e.cargarDashboard)
-  const gastoAbierto = useAppStore((e) => e.gastoAbierto)
-  const cerrarGasto = useAppStore((e) => e.cerrarGasto)
+  const movimientoAbierto = useAppStore((e) => e.movimientoAbierto)
+  const cerrarMovimiento = useAppStore((e) => e.cerrarMovimiento)
   const crearAbierto = useAppStore((e) => e.crearAbierto)
   const cerrarCrearBolsillo = useAppStore((e) => e.cerrarCrearBolsillo)
   const cargarBolsillos = useAppStore((e) => e.cargarBolsillos)
+  const cargarRendimiento = useAppStore((e) => e.cargarRendimiento )
 
-  // Una sola carga al entrar al panel. `RutaProtegida` ya garantizó la sesión.
+  const esAdmin = useAppStore((e) => e.usuario?.role) === 'super_admin'
+  const cargarEstadisticas = useAppStore((e) => e.cargarEstadisticas)
+
+  /*
+    Una sola carga al entrar al panel. `RutaProtegida` ya garantizó la sesión.
+
+    Un administrador no carga el reporte de sus finanzas: no las mira en ningún
+    sitio, y pedirlo sería una petición por cada entrada al panel para un dato
+    que nadie va a leer.
+  */
   useEffect(() => {
-    cargar()
-  }, [cargar])
+    if (!esAdmin) cargar()
+  }, [cargar, esAdmin])
 
+  /* Las estadísticas alimentan la píldora de la cabecera en todas las pantallas. */
+  useEffect(() => {
+    if (esAdmin) void cargarEstadisticas()
+  }, [cargarEstadisticas, esAdmin])
+
+  useEffect(() => {
+    if (esAdmin) return
+    const hoy = new Date()
+    const { desde, hasta} = rangoDelMes(hoy.getFullYear(), hoy.getMonth() +1)
+    void cargarRendimiento(desde, hasta)
+  }, [cargarRendimiento, esAdmin])
+  /*
+    `overflow-x-clip` y no `overflow-x-hidden`: los dos recortan lo que se salga
+    por los lados, pero `hidden` convierte el elemento en un contenedor de
+    desplazamiento —al fijar un eje, el navegador computa el otro como `auto`— y
+    eso anula el `sticky` de la barra lateral, que se pegaría a este div en vez
+    de a la ventana. `clip` recorta sin crear ese contenedor.
+  */
   return (
-    <div className="relative flex min-h-screen items-stretch gap-4 overflow-x-hidden px-4 pt-5 pb-8 md:px-6 md:pt-6">
+    <div className="relative flex min-h-screen items-stretch gap-4 overflow-x-clip px-4 pt-5 pb-8 md:px-6 md:pt-6">
       <Fondo sereno />
 
       <NavLateral />
@@ -77,12 +106,29 @@ export function ArmazonPanel() {
       </div>
 
       {/*
-        Anotar un gasto es un popup y no una pantalla: interrumpe lo que estés
-        mirando y te devuelve ahí mismo al cerrarlo. Vive en el armazón para
-        poder abrirse desde cualquier pantalla del panel.
+        Anotar es un popup y no una pantalla: interrumpe lo que estés mirando y
+        te devuelve ahí mismo al cerrarlo. Vive en el armazón para poder abrirse
+        desde cualquier pantalla del panel.
+
+        Un solo diálogo para gasto e ingreso. `movimientoAbierto` guarda cuál de
+        los dos, y el formulario cambia sus textos y su catálogo con eso: los
+        campos son los mismos y duplicarlo obligaría a corregir cada fallo dos
+        veces.
       */}
-      <Modal abierto={gastoAbierto} onCerrar={cerrarGasto} titulo="Anotar un gasto">
-        <AnotarGasto onCerrar={cerrarGasto} />
+      <Modal
+        abierto={movimientoAbierto !== null}
+        onCerrar={cerrarMovimiento}
+        titulo={
+          movimientoAbierto === 'income'
+            ? 'Registrar un ingreso'
+            : movimientoAbierto === 'transfer'
+              ? 'Mover a ahorro'
+              : 'Anotar un gasto'
+        }
+      >
+        {movimientoAbierto && (
+          <AnotarGasto tipo={movimientoAbierto} onCerrar={cerrarMovimiento} />
+        )}
       </Modal>
 
       {/*

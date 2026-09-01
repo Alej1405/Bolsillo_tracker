@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react'
+import { etiquetaDeCategoria, foco, hojasDeCategorias } from '@/helpers'
 import { Campo } from '@/paginas/acceso'
 import { ErrorApi } from '@/services/api'
 import { Boton } from '@/ui/Boton'
 import { aMontoDelBackend, conSimbolo } from '@/utils/moneda'
 import { useAppStore } from '@/stores/useAppStore'
-import type { Categoria } from '@/types'
+import type { TipoAnotable, TipoPopup } from '@/types'
 
 /** Hoy en formato "2026-08-31", que es lo que el backend espera. */
 function hoy(): string {
@@ -14,29 +15,69 @@ function hoy(): string {
   return `${d.getFullYear()}-${dosDigitos(d.getMonth() + 1)}-${dosDigitos(d.getDate())}`
 }
 
-/**
- * Aplana el árbol de categorías a las hojas elegibles.
- *
- * El catálogo llega en dos niveles —"Alimentación" con "Supermercado",
- * "Restaurantes"…— y se anota al nivel más fino que exista. Un padre sin hijos
- * (como "Otros gastos") sí es elegible; uno con hijos no, porque elegirlo
- * dejaría el gasto sin la precisión que el reparto por categoría necesita.
- */
-function hojas(categorias: Categoria[]): { id: string; nombre: string; padre?: string }[] {
-  const salida: { id: string; nombre: string; padre?: string }[] = []
-  for (const c of categorias) {
-    const hijos = c.children ?? []
-    if (hijos.length === 0) salida.push({ id: c.id, nombre: c.name })
-    else for (const h of hijos) salida.push({ id: h.id, nombre: h.name, padre: c.name })
-  }
-  return salida
-}
 
 /** Lo que tarda el popup en cerrarse solo tras anotar. */
 const SEGUNDOS_PARA_CERRAR = 4
 
-const foco =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-borde-foco'
+/*
+  Lo único que distingue anotar un gasto de anotar un ingreso: las palabras.
+
+  Los campos, la validación, el envío y la confirmación son idénticos —el
+  backend recibe el mismo cuerpo con otro `type`—, así que en vez de dos
+  formularios hay uno y esta tabla. Añadir un tipo nuevo sería una entrada más
+  aquí, no otro archivo.
+
+  Están escritas desde el punto de vista de la persona: en un gasto el dinero
+  sale de un bolsillo y se va a algo; en un ingreso entra a un bolsillo y viene
+  de algún sitio.
+*/
+const TEXTOS = {
+  expense: {
+    accion: 'Anotar el gasto',
+    anotando: 'Anotando…',
+    hecho: 'Gasto anotado',
+    resultado: 'menos en tu bolsillo. Ya está en tu panel.',
+    montoFalta: 'Escribe cuánto gastaste',
+    bolsillo: '¿De qué bolsillo salió?',
+    bolsilloFalta: 'Elige de qué bolsillo salió',
+    categoria: '¿En qué se fue?',
+    categoriaFalta: 'Elige en qué se fue',
+    categoriaAyuda: 'Es lo que alimenta el reparto de "En qué se fue".',
+    fallo: 'No pudimos anotar el gasto. Inténtalo de nuevo.',
+  },
+  /*
+    Mover a ahorro no es dinero que entra ni que sale: es dinero que cambia de
+    sitio. Por eso el tercer campo no es una categoría sino el bolsillo de
+    destino, y por eso el resultado no dice "más" ni "menos" en el bolsillo.
+  */
+  transfer: {
+    accion: 'Mover a ahorro',
+    anotando: 'Moviendo…',
+    hecho: 'Guardado en tu ahorro',
+    resultado: 'movidos a tu bolsillo de ahorro.',
+    montoFalta: 'Escribe cuánto quieres guardar',
+    bolsillo: '¿De qué bolsillo sale?',
+    bolsilloFalta: 'Elige de qué bolsillo sale',
+    categoria: '¿A qué bolsillo de ahorro va?',
+    categoriaFalta: 'Elige a qué bolsillo de ahorro va',
+    categoriaAyuda: 'Solo lo que llega a un bolsillo de ahorro cuenta como ahorrado.',
+    fallo: 'No pudimos mover el dinero. Inténtalo de nuevo.',
+  },
+  income: {
+    accion: 'Anotar el ingreso',
+    anotando: 'Anotando…',
+    hecho: 'Ingreso anotado',
+    resultado: 'más en tu bolsillo. Ya está en tu panel.',
+    montoFalta: 'Escribe cuánto recibiste',
+    bolsillo: '¿A qué bolsillo entró?',
+    bolsilloFalta: 'Elige a qué bolsillo entró',
+    categoria: '¿De dónde vino?',
+    categoriaFalta: 'Elige de dónde vino',
+    categoriaAyuda: 'Sirve para saber de dónde viene tu dinero.',
+    fallo: 'No pudimos anotar el ingreso. Inténtalo de nuevo.',
+  },
+} as const
+
 
 /**
  * Anotar un gasto: la acción principal del producto.
@@ -49,10 +90,36 @@ const foco =
  * fue, cuándo. El monto va primero porque es lo único que la persona ya tiene
  * en la cabeza cuando abre esto.
  */
-export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
+export function AnotarGasto({
+  tipo,
+  onCerrar,
+}: {
+  tipo: TipoPopup
+  onCerrar: () => void
+}) {
+  /* Los textos del tipo que toca. Se calcula en el render, no es estado. */
+  const texto = TEXTOS[tipo]
+  /*
+    Mover a ahorro es una transferencia: va a otro endpoint, no lleva categoría
+    y su tercer campo es un bolsillo, no una categoría. Todo lo demás —monto,
+    origen, fecha, nota— es igual, y por eso comparte formulario.
+  */
+  const esAhorro = tipo === 'transfer'
+
   const bolsillos = useAppStore((e) => e.bolsillos)
   const cargarBolsillos = useAppStore((e) => e.cargarBolsillos)
-  const categorias = useAppStore((e) => e.categorias)
+  const categorias = useAppStore((e) => e.categorias)[esAhorro ? 'expense' : tipo]
+  const pasarPlata = useAppStore((e) => e.pasarPlata)
+  /*
+    A dónde va el ahorro. No se pregunta: quien pulsa "Mover a ahorro" ya dijo
+    a dónde quiere que vaya, y volver a preguntarlo con un desplegable de una
+    sola opción es trabajo que la pantalla puede hacer sola.
+
+    Si hubiera varios bolsillos de ahorro se toma el primero. Elegir entre
+    varios es otra conversación —y otro formulario—; esto resuelve el caso que
+    existe hoy.
+  */
+  const bolsilloDeAhorro = bolsillos.find((b) => b.type === 'savings')
   const cargarCategorias = useAppStore((e) => e.cargarCategorias)
   const errorCategorias = useAppStore((e) => e.errorCategorias)
   const anotar = useAppStore((e) => e.anotar)
@@ -78,10 +145,12 @@ export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
   */
   const [restan, setRestan] = useState<number | null>(null)
 
+  /* El catálogo depende del tipo: las de gasto no sirven para un ingreso. */
   useEffect(() => {
     void cargarBolsillos()
-    void cargarCategorias()
-  }, [cargarBolsillos, cargarCategorias])
+    /* Una transferencia no lleva categoría: no hay catálogo que pedir. */
+    if (!esAhorro) void cargarCategorias(tipo as TipoAnotable)
+  }, [cargarBolsillos, cargarCategorias, tipo, esAhorro])
 
   /*
     La cuenta atrás para cerrar solo.
@@ -124,15 +193,22 @@ export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
     if (!bolsillo && bolsillos.length === 1) setBolsillo(bolsillos[0].id)
   }, [bolsillos, bolsillo])
 
-  const elegibles = useMemo(() => hojas(categorias), [categorias])
+  const elegibles = useMemo(() => hojasDeCategorias(categorias), [categorias])
 
   const validar = () => {
     const fallos: typeof errores = {}
-    if (!monto.trim()) fallos.monto = 'Escribe cuánto gastaste'
+    if (!monto.trim()) fallos.monto = texto.montoFalta
     else if (!/^\d{1,12}([.,]\d{1,2})?$/.test(monto.trim()))
       fallos.monto = 'Escribe un monto válido, por ejemplo 12,75'
-    if (!bolsillo) fallos.bolsillo = 'Elige de qué bolsillo salió'
-    if (!categoria) fallos.categoria = 'Elige en qué se fue'
+    if (!bolsillo) fallos.bolsillo = texto.bolsilloFalta
+    /* Una transferencia no lleva categoría: ese campo no existe en ese modo. */
+    if (!esAhorro && !categoria) fallos.categoria = texto.categoriaFalta
+    /*
+      Mover dinero al mismo bolsillo del que sale no es nada, y el backend lo
+      rechaza con un CHECK. Se avisa antes de enviarlo para no gastar un viaje.
+    */
+    if (esAhorro && bolsillo && bolsillo === bolsilloDeAhorro?.id)
+      fallos.bolsillo = 'Ese ya es tu bolsillo de ahorro: elige de dónde sacas la plata'
     return fallos
   }
 
@@ -145,14 +221,29 @@ export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
     if (Object.keys(fallos).length > 0) return
 
     try {
-      const mov = await anotar({
-        type: 'expense',
+      const comun = {
         amount: aMontoDelBackend(monto),
-        account_id: bolsillo,
-        category_id: categoria,
         occurred_at: fecha,
         ...(nota.trim() ? { note: nota.trim() } : {}),
-      })
+      }
+      /*
+        Dos endpoints distintos porque son operaciones distintas para el
+        backend: `/transactions` con un tipo, o `/transfers` con dos cuentas.
+        Aquí es lo único que se bifurca; el formulario ya se encargó de pedir
+        los campos que hacen falta en cada caso.
+      */
+      const mov = esAhorro
+        ? await pasarPlata({
+            ...comun,
+            from_account_id: bolsillo,
+            to_account_id: bolsilloDeAhorro?.id ?? '',
+          })
+        : await anotar({
+            ...comun,
+            type: tipo as TipoAnotable,
+            account_id: bolsillo,
+            category_id: categoria,
+          })
       setHecho(conSimbolo(mov.amount))
       setRestan(SEGUNDOS_PARA_CERRAR)
       setMonto('')
@@ -166,7 +257,7 @@ export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
         return
       }
       setAviso(
-        error instanceof Error ? error.message : 'No pudimos anotar el gasto. Inténtalo de nuevo.',
+        error instanceof Error ? error.message : texto.fallo,
       )
     }
   }
@@ -176,6 +267,40 @@ export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
     alerta dentro del propio popup, con la salida a mano — cerrar el diálogo
     para descubrir por qué no se puede anotar sería un callejón.
   */
+  /*
+    Mover a ahorro sin un bolsillo de ahorro no se puede: el destino no existe.
+    Mismo patrón que la alerta de arriba —el problema, y la salida a mano— para
+    no dejar un formulario que no puede enviarse.
+  */
+  if (esAhorro && !bolsilloDeAhorro) {
+    return (
+      <div className="flex flex-col gap-5">
+        <div role="alert" className="flex items-start gap-3 rounded-extra bg-aviso-sutil px-5 py-4">
+          <WarningCircleIcon size={20} weight="fill" aria-hidden className="mt-0.5 text-aviso" />
+          <p className="flex-1 text-cuerpo leading-relaxed text-texto-principal">
+            Todavía no tienes un bolsillo de ahorro. Crea uno de tipo{' '}
+            <strong className="font-semibold">Ahorro</strong> y podrás mover ahí la plata que vayas
+            guardando: es lo que cuenta como ahorrado en tus reportes.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <Boton
+            onClick={() => {
+              onCerrar()
+              abrirCrearBolsillo()
+            }}
+          >
+            Crear bolsillo de ahorro
+          </Boton>
+          <Boton variante="secundario" onClick={onCerrar}>
+            Ahora no
+          </Boton>
+        </div>
+      </div>
+    )
+  }
+
   if (bolsillos.length === 0) {
     return (
       <div className="flex flex-col gap-5">
@@ -227,10 +352,10 @@ export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
         >
           <CheckCircleIcon size={40} weight="fill" aria-hidden className="text-ingreso" />
           <p className="font-titulo text-titulo-menor font-bold text-texto-principal">
-            Gasto anotado
+            {texto.hecho}
           </p>
           <p className="text-cuerpo text-texto-secundario">
-            {hecho} menos en tu bolsillo. Ya está en tu panel.
+            {hecho} {texto.resultado}
           </p>
         </div>
 
@@ -265,7 +390,7 @@ export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="bolsillo-gasto" className="text-nota font-medium text-texto-principal">
-          ¿De qué bolsillo salió?
+          {texto.bolsillo}
         </label>
         <select
           id="bolsillo-gasto"
@@ -289,31 +414,42 @@ export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
         </p>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="categoria-gasto" className="text-nota font-medium text-texto-principal">
-          ¿En qué se fue?
-        </label>
-        <select
-          id="categoria-gasto"
-          value={categoria}
-          onChange={(e) => setCategoria(e.target.value)}
-          className={`h-11 rounded-grande border border-borde-fuerte bg-fondo-superficie px-3 text-cuerpo text-texto-principal outline-none ${foco}`}
-        >
-          <option value="">Elige una</option>
-          {elegibles.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.padre ? `${c.padre} · ${c.nombre}` : c.nombre}
-            </option>
-          ))}
-        </select>
-        <p className="text-micro text-texto-tenue">
-          {errores.categoria ? (
-            <span className="text-gasto">{errores.categoria}</span>
-          ) : (
-            'Es lo que alimenta el reparto de "En qué se fue".'
-          )}
+      {/*
+        El tercer campo solo existe cuando hay algo que elegir. Al mover a
+        ahorro el destino no se pregunta: se dice a dónde va y ya está.
+      */}
+      {esAhorro ? (
+        <p className="rounded-medio bg-fondo-sutil px-4 py-3 text-nota text-texto-secundario">
+          Va a <strong className="font-semibold">{bolsilloDeAhorro?.name}</strong>, tu bolsillo de
+          ahorro. {texto.categoriaAyuda}
         </p>
-      </div>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="categoria-gasto" className="text-nota font-medium text-texto-principal">
+            {texto.categoria}
+          </label>
+          <select
+            id="categoria-gasto"
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+            className={`h-11 rounded-grande border border-borde-fuerte bg-fondo-superficie px-3 text-cuerpo text-texto-principal outline-none ${foco}`}
+          >
+            <option value="">Elige una</option>
+            {elegibles.map((c) => (
+              <option key={c.id} value={c.id}>
+                {etiquetaDeCategoria(c)}
+              </option>
+            ))}
+          </select>
+          <p className="text-micro text-texto-tenue">
+            {errores.categoria ? (
+              <span className="text-gasto">{errores.categoria}</span>
+            ) : (
+              texto.categoriaAyuda
+            )}
+          </p>
+        </div>
+      )}
 
       <Campo
         id="fecha-gasto"
@@ -341,7 +477,7 @@ export function AnotarGasto({ onCerrar }: { onCerrar: () => void }) {
       )}
 
       <Boton type="submit" disabled={anotando} className="w-full">
-        {anotando ? 'Anotando…' : 'Anotar el gasto'}
+        {anotando ? texto.anotando : texto.accion}
       </Boton>
     </form>
   )

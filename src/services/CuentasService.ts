@@ -55,6 +55,15 @@ export async function archivarCuenta(id: string): Promise<Cuenta> {
 }
 
 /**
+ * Saca un bolsillo del archivo: vuelve a contar en el patrimonio y reaparece
+ * en las listas. Es el camino de vuelta de `archivarCuenta`.
+ */
+export async function desarchivarCuenta(id: string): Promise<Cuenta> {
+  const { data } = await api.post(`/accounts/${id}/unarchive`)
+  return CuentaAPIResponseSchema.parse(data)
+}
+
+/**
  * Borra un bolsillo de verdad.
  *
  * El backend responde 409 con código `IN_USE` si tiene movimientos: no se

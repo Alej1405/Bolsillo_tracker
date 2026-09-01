@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react'
+import { MagnifyingGlassIcon, XIcon, CaretDownIcon } from '@phosphor-icons/react'
 import { EsperandoLista } from '@/layout/panel/Esperando'
 import { aFilas } from '@/paginas/panel/adaptadores'
 import { FilaMovimiento } from '@/piezas'
 import { Boton } from '@/ui/Boton'
+import { Paginacion } from '@/piezas'
+import { Ficha } from '@/ui/Ficha'
+import { control, etiquetaDeCategoria, foco, hojasDeCategorias, selector } from '@/helpers'
 import { useAppStore } from '@/stores/useAppStore'
 import type { FiltrosMovimientos } from '@/services/MovimientosService'
-import type { Categoria } from '@/types'
 
 const POR_PAGINA = 12
 
@@ -18,38 +20,6 @@ const TIPOS: { id: Tipo; texto: string }[] = [
   { id: 'income', texto: 'Ingresos' },
   { id: 'transfer', texto: 'Transferencias' },
 ]
-
-const foco =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-borde-foco'
-const control = `h-11 rounded-grande border border-borde-fuerte bg-fondo-superficie px-3 text-nota text-texto-principal outline-none ${foco}`
-
-/** Aplana el árbol de categorías para el selector. */
-function hojas(categorias: Categoria[]): { id: string; nombre: string }[] {
-  const salida: { id: string; nombre: string }[] = []
-  for (const c of categorias) {
-    const hijos = c.children ?? []
-    if (hijos.length === 0) salida.push({ id: c.id, nombre: c.name })
-    else for (const h of hijos) salida.push({ id: h.id, nombre: `${c.name} · ${h.name}` })
-  }
-  return salida
-}
-
-function Ficha({ texto, activa, onClick }: { texto: string; activa: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={activa}
-      className={`flex min-h-11 items-center gap-2 rounded-full border px-4 text-nota font-medium transition-colors active:scale-[0.97] ${foco} ${
-        activa
-          ? 'border-accion-principal bg-accion-principal text-texto-sobre-marca'
-          : 'border-borde-fuerte bg-fondo-superficie text-texto-secundario hover:bg-fondo-sutil'
-      }`}
-    >
-      {texto}
-    </button>
-  )
-}
 
 /**
  * Pantalla de historial: todos los movimientos, con filtros.
@@ -69,7 +39,8 @@ export function Historial() {
   const cargarHistorial = useAppStore((e) => e.cargarHistorial)
   const bolsillos = useAppStore((e) => e.bolsillos)
   const cargarBolsillos = useAppStore((e) => e.cargarBolsillos)
-  const categorias = useAppStore((e) => e.categorias)
+  /* Las de gasto: son las que se usan para filtrar el historial. */
+  const categorias = useAppStore((e) => e.categorias).expense
   const cargarCategorias = useAppStore((e) => e.cargarCategorias)
 
   const [tipo, setTipo] = useState<Tipo>('todo')
@@ -137,10 +108,10 @@ export function Historial() {
   const filas = aFilas(historial?.items)
   const paginas = historial?.total_pages ?? 1
   const total = historial?.total ?? 0
-  const elegibles = useMemo(() => hojas(categorias), [categorias])
+  const elegibles = useMemo(() => hojasDeCategorias(categorias), [categorias])
 
   return (
-    <section className="vidrio flex flex-1 flex-col gap-5 rounded-maximo p-5 md:p-6">
+    <section className="vidrio-transparente flex flex-1 flex-col gap-5 rounded-maximo p-5 md:p-6">
       <div className="flex flex-col gap-1">
         <h2 className="font-titulo text-titulo-menor font-bold text-texto-principal">Historial</h2>
         <p className="text-nota text-texto-tenue">
@@ -163,7 +134,7 @@ export function Historial() {
             />
           ))}
 
-          <div className="relative min-w-[200px] flex-1">
+          <div className="relative 'min-w-[200px]' flex-1">
             <MagnifyingGlassIcon
               size={16}
               aria-hidden
@@ -187,42 +158,58 @@ export function Historial() {
         </div>
 
         <div className="flex flex-wrap items-end gap-3">
-          <div className="flex min-w-[160px] flex-1 flex-col gap-1.5">
+          <div className="flex 'min-w-[160px]' flex-1 flex-col gap-1.5">
             <label htmlFor="bolsillo-historial" className="text-micro text-texto-tenue">
               Bolsillo
             </label>
-            <select
-              id="bolsillo-historial"
-              value={bolsillo}
-              onChange={(e) => cambiar(setBolsillo)(e.target.value)}
-              className={control}
-            >
-              <option value="">Todos</option>
-              {bolsillos.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="bolsillo-historial"
+                value={bolsillo}
+                onChange={(e) => cambiar(setBolsillo)(e.target.value)}
+                className={`${selector} w-full`}
+              >
+                <option value="">Todos</option>
+                {bolsillos.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+              <CaretDownIcon
+                size={14}
+                weight="bold"
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-texto-tenue"
+              />
+            </div>
           </div>
 
-          <div className="flex min-w-[160px] flex-1 flex-col gap-1.5">
+          <div className="flex 'min-w-[160px]' flex-1 flex-col gap-1.5">
             <label htmlFor="categoria-historial" className="text-micro text-texto-tenue">
               Categoría
             </label>
-            <select
-              id="categoria-historial"
-              value={categoria}
-              onChange={(e) => cambiar(setCategoria)(e.target.value)}
-              className={control}
-            >
-              <option value="">Todas</option>
-              {elegibles.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="categoria-historial"
+                value={categoria}
+                onChange={(e) => cambiar(setCategoria)(e.target.value)}
+                className={`${selector} w-full`}
+              >
+                <option value="">Todas</option>
+                {elegibles.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {etiquetaDeCategoria(c)}
+                  </option>
+                ))}
+              </select>
+              <CaretDownIcon
+                  size={14}
+                  weight="bold"
+                  aria-hidden
+                  className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-texto-tenue"
+                />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -274,7 +261,18 @@ export function Historial() {
       ) : cargando ? (
         <EsperandoLista filas={6} alto={60} />
       ) : filas.length > 0 ? (
-        <div className="flex flex-col gap-1">
+        /*
+          La lista se desplaza dentro de sí misma, no arrastrando la página: el
+          título, los filtros y la paginación se quedan donde están. Sin esto
+          hay que bajar hasta el final de las doce filas para cambiar de página
+          y volver arriba para tocar un filtro.
+
+          El tope va en `max-h` y no en `flex-1` para no depender de la altura
+          de los padres: esto afecta solo a esta tarjeta y a nada más de la
+          pantalla. `pr-1` deja sitio a la barra para que no se monte sobre los
+          montos.
+        */
+        <div className="flex flex-col max-h-[60dvh] gap-1 pr-1 overflow-y-auto">
           {filas.map((m) => (
             <FilaMovimiento
               key={m.id}
@@ -299,24 +297,9 @@ export function Historial() {
           <p className="text-nota text-texto-tenue">
             Página {pagina} de {paginas}
           </p>
-          <nav aria-label="Páginas del historial" className="flex items-center gap-2">
-            <Boton
-              variante="secundario"
-              tamano="mediano"
-              onClick={() => setPagina((n) => Math.max(n - 1, 1))}
-              disabled={pagina === 1}
-            >
-              Anterior
-            </Boton>
-            <Boton
-              variante="secundario"
-              tamano="mediano"
-              onClick={() => setPagina((n) => Math.min(n + 1, paginas))}
-              disabled={pagina === paginas}
-            >
-              Siguiente
-            </Boton>
-          </nav>
+          {/* `pasos` y no números: aquí las páginas las decide el servidor y
+              pueden ser decenas. */}
+          <Paginacion pagina={pagina} paginas={paginas} ir={setPagina} variante="pasos" />
         </div>
       )}
     </section>

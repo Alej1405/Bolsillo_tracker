@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { curva, duracion } from '@/movimiento'
+import { XIcon } from '@phosphor-icons/react'
+import { foco } from '@/helpers'
 
 type ModalProps = {
   abierto: boolean
@@ -140,6 +142,24 @@ export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
             */
             className="relative my-auto w-full max-w-[440px] rounded-extra bg-fondo-superficie p-6 shadow-[0_24px_60px_-20px_color-mix(in_srgb,var(--color-tinta-950)_35%,transparent)] sm:p-8"
           >
+            {/*
+              La salida visible. El diálogo ya se cierra con Escape y con un
+              clic fuera, pero las dos son invisibles: quien no las conoce se
+              queda buscando cómo salir.
+
+              Va en el Modal y no en cada formulario para que los diálogos se
+              cierren todos igual, y `absolute` para que no empuje el contenido
+              ni obligue a cada uno a dejarle sitio.
+            */}
+            <button
+              type="button"
+              onClick={onCerrar}
+              aria-label="Cerrar"
+              className={`absolute top-4 right-4 grid size-9 place-items-center rounded-full text-texto-tenue transition-colors hover:bg-fondo-sutil hover:text-texto-principal ${foco}`}
+            >
+              <XIcon size={18} weight="bold" aria-hidden />
+            </button>
+
             {children}
           </motion.div>
         </motion.div>

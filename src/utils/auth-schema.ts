@@ -31,8 +31,24 @@ export const UsuarioAPIResponseSchema = z.object({
   id: z.string(),
   full_name: z.string(),
   email: z.string(),
-  role: z.string(),
+  /*
+    Los dos roles del backend (UserRole). Enum y no `string` para que el
+    compilador obligue a comprobarlo bien: con `string` cualquier comparación
+    pasa, incluso una mal escrita.
+
+    Quién puede hacer qué lo decide el backend en cada petición, leyendo el rol
+    de la base. Esto solo sirve para no ofrecer en pantalla lo que se va a
+    rechazar con un 403.
+  */
+  role: z.enum(['client', 'super_admin']),
   created_at: z.string(),
+  /*
+    Ruta de la foto de perfil, relativa al servidor: "/media/avatares/x.png".
+    Es null mientras no suba ninguna, y entonces se muestran las iniciales.
+    `optional` porque el backend viejo no lo mandaba: sin eso, una respuesta
+    anterior al despliegue rompería el login entero.
+  */
+  avatar_url: z.string().nullable().optional(),
 })
 
 /** Respuesta de registro y de login (`RegisterResponse`). */
@@ -75,9 +91,18 @@ export const CambiarClaveSchema = z.object({
     .regex(/\d/, 'Necesita al menos un número'),
 })
 
+/*
+  Un usuario visto por el administrador. Es la ficha normal más `is_active`:
+  el backend solo devuelve ese campo a `super_admin`, porque saber si una
+  cuenta está dada de baja no es asunto de los demás.
+*/
+export const UsuarioAdminAPIResponseSchema = UsuarioAPIResponseSchema.extend({
+  is_active: z.boolean(),
+})
+
 /** Página de usuarios. Solo la ve `super_admin`. */
 export const ListaUsuariosAPIResponseSchema = z.object({
-  items: z.array(UsuarioAPIResponseSchema.extend({ is_active: z.boolean() })),
+  items: z.array(UsuarioAdminAPIResponseSchema),
   page: z.number(),
   page_size: z.number(),
   total: z.number(),

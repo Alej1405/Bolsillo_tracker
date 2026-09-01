@@ -2,7 +2,8 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Cargador } from '@/movimiento'
 import { useTipoPantalla } from '@/pantalla'
-import { RutaProtegida } from '@/app/RutaProtegida'
+import { RutaDeAdmin, RutaDeCliente, RutaProtegida } from '@/app/RutaProtegida'
+import { useAppStore } from '@/stores/useAppStore'
 
 /*
   Cada rama se carga cuando hace falta, no toda de golpe al abrir la página.
@@ -39,9 +40,34 @@ const Historial = lazy(() =>
 const Reportes = lazy(() =>
   import('@/paginas/panel/Reportes').then((m) => ({ default: m.Reportes })),
 )
+const Rendimiento = lazy(() =>
+  import('@/paginas/panel/Rendimiento').then((m) => ({ default: m.Rendimiento })),
+)
+const DashboardAdmin = lazy(() =>
+  import('@/paginas/panel/DashboardAdmin').then((m) => ({ default: m.DashboardAdmin })),
+)
+const Soporte = lazy(() =>
+  import('@/paginas/panel/Soporte').then((m) => ({ default: m.Soporte })),
+)
+const Consultas = lazy(() =>
+  import('@/paginas/panel/Consultas').then((m) => ({ default: m.Consultas })),
+)
+const Sitio = lazy(() => import('@/paginas/panel/Sitio').then((m) => ({ default: m.Sitio })))
+const TiktokCallback = lazy(() =>
+  import('@/paginas/panel/TiktokCallback').then((m) => ({ default: m.TiktokCallback })),
+)
+const Usuarios = lazy(() =>
+  import('@/paginas/panel/Usuarios').then((m) => ({ default: m.Usuarios })),
+)
 const MiCuenta = lazy(() =>
   import('@/paginas/panel/MiCuenta').then((m) => ({ default: m.MiCuenta })),
 )
+
+/** Qué panel toca al entrar, según quién eres. */
+function Inicio() {
+  const rol = useAppStore((e) => e.usuario?.role)
+  return rol === 'super_admin' ? <DashboardAdmin /> : <Dashboard />
+}
 
 export function App() {
   const pantalla = useTipoPantalla()
@@ -81,11 +107,29 @@ export function App() {
           */}
           <Route element={<RutaProtegida />}>
             <Route element={<ArmazonPanel />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/historial" element={<Historial />} />
-              <Route path="/bolsillos" element={<Bolsillos />} />
-              <Route path="/reportes" element={<Reportes />} />
+              {/*
+                La misma ruta, dos pantallas. Un administrador entra a ver cómo
+                va la plataforma, no sus gastos del mes. Con `lazy` cada rol
+                descarga solo la suya.
+              */}
+              <Route path="/dashboard" element={<Inicio />} />
+              {/* Finanzas personales: no las usa un administrador. */}
+              <Route element={<RutaDeCliente />}>
+                <Route path="/historial" element={<Historial />} />
+                <Route path="/bolsillos" element={<Bolsillos />} />
+                <Route path="/reportes" element={<Reportes />} />
+                <Route path="/rendimiento" element={<Rendimiento />} />
+                <Route path="/soporte" element={<Soporte />} />
+              </Route>
               <Route path="/mi-cuenta" element={<MiCuenta />} />
+              {/* Solo super_admin. `lazy` hace que un cliente ni descargue este código. */}
+              <Route element={<RutaDeAdmin />}>
+                <Route path="/usuarios" element={<Usuarios />} />
+                <Route path="/consultas" element={<Consultas />} />
+                <Route path="/sitio" element={<Sitio />} />
+                {/* A donde vuelve TikTok tras autorizar. */}
+                <Route path="/tiktok/callback" element={<TiktokCallback />} />
+              </Route>
             </Route>
           </Route>
 

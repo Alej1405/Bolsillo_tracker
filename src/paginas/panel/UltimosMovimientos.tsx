@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
-import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react'
+import { MagnifyingGlassIcon } from '@phosphor-icons/react'
 import { EsperandoLista } from '@/layout/panel/Esperando'
-import { FilaMovimiento } from '@/piezas'
+import { FilaMovimiento, Paginacion } from '@/piezas'
+import { Ficha } from '@/ui/Ficha'
+import { foco } from '@/helpers'
 import type { FilaMovimiento as Fila } from '@/paginas/panel/adaptadores'
 
 const POR_PAGINA = 5
@@ -14,95 +16,6 @@ const VISTAS: { id: Vista; texto: string }[] = [
   { id: 'ingreso', texto: 'Solo ingresos' },
   { id: 'transferencia', texto: 'Transferencias' },
 ]
-
-const foco =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-borde-foco'
-
-/**
- * Ficha de filtro. Se comporta como un grupo de opción única, no como cuatro
- * interruptores sueltos: `aria-pressed` solo dice la verdad si el estado
- * cambia de verdad al pulsar.
- */
-function Ficha({
-  texto,
-  activa,
-  onClick,
-}: {
-  texto: string
-  activa: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={activa}
-      className={`flex min-h-11 items-center gap-2 rounded-full border px-4 text-nota font-medium transition-colors active:scale-[0.97] ${foco} ${
-        activa
-          ? 'border-lavanda-800 bg-lavanda-800 text-texto-sobre-marca'
-          : 'border-borde-fuerte bg-fondo-superficie text-texto-secundario hover:bg-fondo-sutil'
-      }`}
-    >
-      {texto}
-      {activa && texto !== 'Todo' && <XIcon size={12} weight="bold" aria-hidden />}
-    </button>
-  )
-}
-
-/** Control de página. Solo aparece cuando hay más de una. */
-function Paginacion({
-  pagina,
-  paginas,
-  ir,
-}: {
-  pagina: number
-  paginas: number
-  ir: (n: number) => void
-}) {
-  const boton =
-    `grid size-11 place-items-center rounded-medio text-nota font-medium transition-colors active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none ${foco}`
-
-  return (
-    <nav aria-label="Páginas del historial" className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={() => ir(pagina - 1)}
-        disabled={pagina === 1}
-        aria-label="Página anterior"
-        className={`${boton} border border-borde-fuerte bg-fondo-superficie text-texto-secundario hover:bg-fondo-sutil`}
-      >
-        ‹
-      </button>
-
-      {Array.from({ length: paginas }, (_, i) => i + 1).map((n) => (
-        <button
-          key={n}
-          type="button"
-          onClick={() => ir(n)}
-          aria-label={`Página ${n}`}
-          aria-current={n === pagina ? 'page' : undefined}
-          className={`${boton} ${
-            n === pagina
-              ? 'bg-accion-principal text-texto-sobre-marca'
-              : 'border border-borde-fuerte bg-fondo-superficie text-texto-secundario hover:bg-fondo-sutil'
-          }`}
-        >
-          {n}
-        </button>
-      ))}
-
-      <button
-        type="button"
-        onClick={() => ir(pagina + 1)}
-        disabled={pagina === paginas}
-        aria-label="Página siguiente"
-        className={`${boton} border border-borde-fuerte bg-fondo-superficie text-texto-secundario hover:bg-fondo-sutil`}
-      >
-        ›
-      </button>
-    </nav>
-  )
-}
 
 /**
  * Los últimos movimientos, dentro del panel de inicio.
@@ -162,13 +75,15 @@ export function UltimosMovimientos({
         {VISTAS.map((v) => (
           <Ficha
             key={v.id}
+            tono="marca"
+            conQuitar
             texto={v.texto}
             activa={vista === v.id}
             onClick={() => cambiarVista(vista === v.id && v.id !== 'todo' ? 'todo' : v.id)}
           />
         ))}
 
-        <div className="relative min-w-[180px] flex-1">
+        <div className="relative 'min-w-[180px]' flex-1">
           <MagnifyingGlassIcon
             size={16}
             aria-hidden
@@ -196,7 +111,32 @@ export function UltimosMovimientos({
       {cargando ? (
         <EsperandoLista filas={5} alto={60} />
       ) : visibles.length > 0 ? (
-        <div className="flex flex-col gap-1">
+        /*
+          La lista se desplaza por dentro en vez de estirar la tarjeta.
+
+          El tope no es un número redondo: sale de medir la pantalla de inicio.
+          Todo lo que hay fuera de esta lista —cabecera, gráficos, el resto de
+          la tarjeta— suma 562px, así que restando eso a la altura de la ventana
+          queda lo que la lista puede ocupar sin que el inicio desborde. Los 8px
+          de más son holgura para no depender del píxel exacto.
+
+          Con esto el inicio entra completo en una pantalla de 800 de alto, y en
+          una más grande la lista crece sola y enseña más filas.
+
+          `overscroll-contain` evita que al llegar al final el desplazamiento
+          siga arrastrando la página, y `tabIndex` hace la lista alcanzable con
+          el teclado: las filas no son botones, así que sin él no habría forma
+          de bajar sin ratón.
+
+          La barra se tiñe con los colores del proyecto: es una superficie del
+          navegador y por defecto llega con el gris de nadie.
+        */
+        <div
+          tabIndex={0}
+          role="group"
+          aria-label="Tus movimientos"
+          className="flex flex-col max-h-[calc(100dvh-570px)] gap-1 pr-1 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-color:var(--color-borde-fuerte)_transparent] [scrollbar-width:thin]"
+        >
           {visibles.map((m) => (
             <FilaMovimiento
               key={m.id}

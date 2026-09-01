@@ -213,8 +213,8 @@
   }
 
   .vidrio-secundario {
-    background-color: color-mix(in srgb, #ffffff 1%, transparent);
-    backdrop-filter: blur(8.5px);
+    background-color:rgba(255, 255, 255, 0)e ;
+    backdrop-filter: blur(2px);
     box-shadow: 0 24px 60px -20px color-mix(in srgb, var(--color-lavanda-900) 2%, transparent);
   }
   .vidrio {

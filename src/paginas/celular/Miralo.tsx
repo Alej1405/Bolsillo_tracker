@@ -1,9 +1,8 @@
 import { PlayIcon } from '@phosphor-icons/react'
 import { Pantalla } from '@/layout/celular/Pantalla'
-import { pasos } from '@/datos'
+import { pasos, videos } from '@/datos'
 
 // Tres espacios listos para incrustar los videos de TikTok desde el código.
-const videos = [0.3, 0.5, 0.7]
 
 /**
  * La prueba y los pasos. En escritorio los videos van en fila de tres; aquí

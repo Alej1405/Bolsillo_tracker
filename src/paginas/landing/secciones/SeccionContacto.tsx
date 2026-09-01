@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { EnvelopeSimpleIcon, PhoneIcon, MapPinIcon, ClockIcon } from '@phosphor-icons/react'
 import type { Icon } from '@phosphor-icons/react'
-import { Revelar, duracion } from '@/movimiento'
+import { Revelar } from '@/movimiento'
 import { BotonEnviar } from '@/ui/BotonEnviar'
 import { canales, asuntos } from '@/datos'
-import type { ClaseCanal } from '@/datos'
+import { contactar } from '@/services/SoporteService'
+import { useAppStore } from '@/stores/useAppStore'
+import type { Canal, ClaseCanal } from '@/datos'
 
 /*
   Mapa clase → icono. Vive en la vista y no en los datos a propósito: el
@@ -28,19 +30,98 @@ export function SeccionContacto() {
     en lugar del temporizador y el botón no cambia.
   */
   const [despachando, setDespachando] = useState(false)
-  const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [enviado, setEnviado] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  /*
+    Los datos de contacto salen del backend, no del código: el super_admin los
+    edita desde su panel y esta sección los muestra. Si la petición falla, la
+    sección sigue con lo que hubiera; no es motivo para romper la página.
+  */
+  const contacto = useAppStore((e) => e.contacto)
+  const cargarContacto = useAppStore((e) => e.cargarContacto)
 
   useEffect(() => {
-    return () => {
-      if (temporizador.current) clearTimeout(temporizador.current)
-    }
-  }, [])
+    void cargarContacto()
+  }, [cargarContacto])
 
-  const enviar = (e: React.FormEvent) => {
+  /*
+    Los canales que se muestran. Se arman con lo que llegó del backend, y
+    mientras no haya respuesta se usan los de muestra: en una landing, un hueco
+    donde debería estar el teléfono se lee como que la empresa no existe.
+
+    Solo entra lo que tenga valor. Un canal con la etiqueta puesta y el dato
+    vacío es peor que no enseñar ese canal.
+  */
+  const canalesVisibles: Canal[] = []
+  if (contacto) {
+    if (contacto.email)
+      canalesVisibles.push({
+        id: 'can-correo',
+        clase: 'correo',
+        etiqueta: 'Escríbenos',
+        valor: contacto.email,
+        enlace: `mailto:${contacto.email}`,
+      })
+    if (contacto.phone)
+      canalesVisibles.push({
+        id: 'can-telefono',
+        clase: 'telefono',
+        etiqueta: 'Llámanos',
+        valor: contacto.phone,
+        //`tel:` sin espacios ni paréntesis: es lo que sabe marcar un teléfono.
+        enlace: `tel:${contacto.phone.replace(/[^\d+]/g, '')}`,
+      })
+    if (contacto.address)
+      canalesVisibles.push({
+        id: 'can-direccion',
+        clase: 'ubicacion',
+        etiqueta: 'Estamos en',
+        valor: contacto.address,
+      })
+    if (contacto.schedule)
+      canalesVisibles.push({
+        id: 'can-horario',
+        clase: 'horario',
+        etiqueta: 'Horario',
+        valor: contacto.schedule,
+      })
+  }
+  const visibles = canalesVisibles.length > 0 ? canalesVisibles : canales
+
+  /*
+    El asunto es un `select` de opciones fijas, así que se manda su texto y no
+    su id: quien lea la consulta en el panel tiene que entenderlo sin consultar
+    ninguna tabla de equivalencias.
+  */
+  const enviar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (despachando) return
+
+    const datos = new FormData(e.currentTarget)
+    const idAsunto = String(datos.get('asunto') ?? '')
+    const asunto = asuntos.find((a) => a.id === idAsunto)?.texto ?? 'Consulta desde la web'
+
     setDespachando(true)
-    temporizador.current = setTimeout(() => setDespachando(false), duracion.despacho * 1000)
+    setError(null)
+    try {
+      await contactar({
+        name: String(datos.get('nombre') ?? '').trim(),
+        email: String(datos.get('correo') ?? '').trim(),
+        subject: asunto,
+        body: String(datos.get('mensaje') ?? '').trim(),
+      })
+      setEnviado(true)
+      e.currentTarget.reset()
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'No pudimos enviar tu mensaje. Inténtalo otra vez en un momento.',
+      )
+    } finally {
+      setDespachando(false)
+    }
   }
 
   return (
@@ -71,7 +152,7 @@ export function SeccionContacto() {
               </div>
 
               <ul className="flex flex-col gap-6">
-                {canales.map((canal) => {
+                {visibles.map((canal) => {
                   const IconoCanal = iconos[canal.clase]
                   return (
                     <li key={canal.id} className="flex items-start gap-3">
@@ -171,6 +252,20 @@ export function SeccionContacto() {
                   className={`mt-1.5 resize-y py-3 ${campo}`}
                 />
               </div>
+
+              {enviado && (
+                <p
+                  role="status"
+                  className="rounded-grande bg-ingreso-sutil px-4 py-3 text-nota text-ingreso"
+                >
+                  Recibido. Te contestamos al correo que nos dejaste.
+                </p>
+              )}
+              {error && (
+                <p role="alert" className="rounded-grande bg-gasto-sutil px-4 py-3 text-nota text-gasto">
+                  {error}
+                </p>
+              )}
 
               <div className="mt-2 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-nota text-texto-tenue">
