@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BankIcon, MoneyWavyIcon, PiggyBankIcon, WalletIcon } from '@phosphor-icons/react'
+import { listarCuentas } from '@/services/CuentasService'
 import { foco, useCerrarSesion } from '@/helpers'
 import { Boton } from '@/ui/Boton'
 import { Modal } from '@/ui/Modal'
@@ -43,7 +44,6 @@ const EJEMPLOS = [
 export function PrimerBolsillo() {
   const usuario = useAppStore((e) => e.usuario)
   const bolsillos = useAppStore((e) => e.bolsillos)
-  const pedidos = useAppStore((e) => e.bolsillosPedidos)
   const cargar = useAppStore((e) => e.cargarBolsillos)
   const abrirCrear = useAppStore((e) => e.abrirCrearBolsillo)
   const crearAbierto = useAppStore((e) => e.crearAbierto)
@@ -52,19 +52,48 @@ export function PrimerBolsillo() {
   const cerrarSesion = useCerrarSesion()
 
   /*
+    Cuantos bolsillos tiene EN TOTAL, archivados incluidos.
+
+    Se consulta aparte y no se lee de `bolsillos` del store por un bug real:
+    esa lista viene sin archivados, asi que alguien que archivo su unico
+    bolsillo tenia cero en la lista y la bienvenida se le abria encima —con
+    sus movimientos ya registrados y sin poder cerrarla, porque este dialogo
+    no tiene salida—. Archivar no es empezar de cero.
+
+    `undefined` mientras no se sabe: hasta que el servidor conteste no se abre
+    nada, que es la unica forma de no hacerlo parpadear a quien si tiene.
+  */
+  const [cuantos, setCuantos] = useState<number | undefined>(undefined)
+
+  /*
     La lista se pide una sola vez. Sin esto, quien entra directo a una pantalla
     que no consulta bolsillos —reportes, por ejemplo— nunca sabría que no tiene
     ninguno, y la bienvenida no aparecería justo donde más falta hace.
   */
   useEffect(() => {
-    if (esCliente && !pedidos) void cargar()
-  }, [esCliente, pedidos, cargar])
+    if (!esCliente) return
+    let vigente = true
+    listarCuentas(true)
+      .then((r) => vigente && setCuantos(r.items.length))
+      /* Si falla la consulta no se interrumpe: mejor no abrir que abrir mal. */
+      .catch(() => vigente && setCuantos(1))
+    return () => {
+      vigente = false
+    }
+    /* `bolsillos.length` en las dependencias: al crear el primero se recuenta
+       y la bienvenida se cierra sola. */
+  }, [esCliente, bolsillos.length])
+
+  /* La lista normal la sigue necesitando el resto del panel. */
+  useEffect(() => {
+    if (esCliente) void cargar()
+  }, [esCliente, cargar])
 
   /*
     Mientras el formulario de crear está abierto la bienvenida se aparta: son
     dos diálogos, y encadenarlos uno encima de otro tapa el que importa.
   */
-  const abierta = esCliente && pedidos && bolsillos.length === 0 && !crearAbierto
+  const abierta = esCliente && cuantos === 0 && !crearAbierto
 
   return (
     <Modal
