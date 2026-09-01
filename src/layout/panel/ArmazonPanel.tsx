@@ -100,9 +100,9 @@ export function ArmazonPanel() {
           navegación. Sin esto quedaba flotando arriba y el papel de valores
           ocupaba media pantalla vacía por debajo.
         */}
-        <div className="flex min-h-0 flex-1 flex-col">
+        <main className="flex min-h-0 flex-1 flex-col">
           <Outlet />
-        </div>
+        </main>
       </div>
 
       {/*

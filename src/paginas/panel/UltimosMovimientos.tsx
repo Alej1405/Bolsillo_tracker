@@ -12,8 +12,8 @@ type Vista = 'todo' | 'gasto' | 'ingreso' | 'transferencia'
 
 const VISTAS: { id: Vista; texto: string }[] = [
   { id: 'todo', texto: 'Todo' },
-  { id: 'gasto', texto: 'Solo gastos' },
-  { id: 'ingreso', texto: 'Solo ingresos' },
+  { id: 'gasto', texto: 'Gastos' },
+  { id: 'ingreso', texto: 'Ingresos' },
   { id: 'transferencia', texto: 'Transferencias' },
 ]
 
@@ -83,7 +83,7 @@ export function UltimosMovimientos({
           />
         ))}
 
-        <div className="relative 'min-w-[180px]' flex-1">
+        <div className="relative min-w-[180px] flex-1">
           <MagnifyingGlassIcon
             size={16}
             aria-hidden
@@ -135,7 +135,7 @@ export function UltimosMovimientos({
           tabIndex={0}
           role="group"
           aria-label="Tus movimientos"
-          className="flex flex-col max-h-[calc(100dvh-570px)] gap-1 pr-1 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-color:var(--color-borde-fuerte)_transparent] [scrollbar-width:thin]"
+          className="flex flex-col gap-1 md:max-h-[calc(100dvh-570px)] md:overflow-x-hidden md:overflow-y-auto md:overscroll-contain md:[scrollbar-color:var(--color-borde-fuerte)_transparent] md:[scrollbar-width:thin]"
         >
           {visibles.map((m) => (
             <FilaMovimiento

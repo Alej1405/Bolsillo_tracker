@@ -50,7 +50,7 @@ function Enlace({ a, etiqueta, Icono }: Destino) {
             />
           )}
           <Icono size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden />
-          <span className="sr-only xl:not-sr-only xl:text-cuerpo xl:font-medium">{etiqueta}</span>
+          <span className="text-nota font-medium xl:text-cuerpo">{etiqueta}</span>
         </>
       )}
     </NavLink>
@@ -88,7 +88,7 @@ export function NavLateral() {
   return (
     <motion.div
       {...aparece()}
-      className="sticky top-5 flex h-[calc(100dvh-3.25rem)] `w-[88px]` shrink-0 flex-col items-center gap-4 self-start md:top-6 md:h-[calc(100dvh-3.5rem)] `xl:w-[232px]`"
+      className="sticky top-5 flex h-[calc(100dvh-3.25rem)] w-[200px] shrink-0 flex-col gap-4 self-start md:top-6 md:h-[calc(100dvh-3.5rem)] xl:w-[232px]"
     >
       <p
         className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-lavanda-200 font-titulo text-nota-mayor font-semibold text-lavanda-950 xl:size-16 xl:text-cuerpo-amplio"
@@ -151,12 +151,9 @@ export function NavLateral() {
             variante="cta"
             title="Mover a ahorro"
             tamano="pequeno"
-            className="w-full px-0! xl:px-6! bg-lavanda-600 hover:bg-lavanda-500"
+            className="min-h-11 w-full px-4! xl:px-6! bg-lavanda-700 hover:bg-lavanda-600"
           >
-            <span className="xl:hidden" aria-hidden>
-              ↑
-            </span>
-            <span className="sr-only xl:not-sr-only">Mover a ahorro</span>
+            <span className="text-nota xl:text-cuerpo">Mover a ahorro</span>
           </Boton>
 
           <Boton
@@ -164,12 +161,9 @@ export function NavLateral() {
             variante="cta"
             title="Registrar un ingreso"
             tamano="pequeno"
-            className="w-full px-0! xl:px-6! bg-marca-700 hover:bg-tinta-400"
+            className="min-h-11 w-full px-4! xl:px-6! bg-marca-700 hover:bg-tinta-400"
           >
-            <span className="xl:hidden" aria-hidden>
-              +
-            </span>
-            <span className="sr-only xl:not-sr-only">Registrar un ingreso</span>
+            <span className="text-nota xl:text-cuerpo">Registrar un ingreso</span>
           </Boton>
 
           <Boton
@@ -177,12 +171,9 @@ export function NavLateral() {
             variante="cta"
             title="Anotar un gasto"
             tamano="pequeno"
-            className="w-full px-0! xl:px-6! bg-marca-700 hover:bg-tinta-400"
+            className="min-h-11 w-full px-4! xl:px-6! bg-marca-700 hover:bg-tinta-400"
           >
-            <span className="xl:hidden" aria-hidden>
-              −
-            </span>
-            <span className="sr-only xl:not-sr-only">Anotar un gasto</span>
+            <span className="text-nota xl:text-cuerpo">Anotar un gasto</span>
           </Boton>
         </div>
         )}

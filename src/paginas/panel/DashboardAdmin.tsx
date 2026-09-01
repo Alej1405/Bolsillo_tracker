@@ -93,7 +93,12 @@ export function DashboardAdmin() {
       {cargandoStats && !stats ? (
         <Esperando alto={120} />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        /*
+          Dos por fila en el teléfono: cuatro números apilados obligan a
+          desplazar cuatro pantallas para leer cuatro cifras. En una rejilla se
+          leen de una mirada, que es a lo que se viene aquí.
+        */
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           <Cifra
             etiqueta="Cuentas"
             valor={String(stats?.users.total ?? 0)}

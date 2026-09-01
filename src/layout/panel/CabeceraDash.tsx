@@ -100,7 +100,7 @@ export function CabeceraDash({
         variante="salir"
         onClick={cerrarSesion} 
         tamano="pequeno"
-        className='p-3 shadow-xl'>
+        className='min-h-11 p-3 shadow-xl'>
         <SignOutIcon size={18} aria-hidden />
         Salir
       </Boton>

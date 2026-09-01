@@ -134,7 +134,7 @@ export function Historial() {
             />
           ))}
 
-          <div className="relative 'min-w-[200px]' flex-1">
+          <div className="relative min-w-[200px] flex-1">
             <MagnifyingGlassIcon
               size={16}
               aria-hidden
@@ -158,7 +158,7 @@ export function Historial() {
         </div>
 
         <div className="flex flex-wrap items-end gap-3">
-          <div className="flex 'min-w-[160px]' flex-1 flex-col gap-1.5">
+          <div className="flex min-w-[160px] flex-1 flex-col gap-1.5">
             <label htmlFor="bolsillo-historial" className="text-micro text-texto-tenue">
               Bolsillo
             </label>
@@ -185,7 +185,7 @@ export function Historial() {
             </div>
           </div>
 
-          <div className="flex 'min-w-[160px]' flex-1 flex-col gap-1.5">
+          <div className="flex min-w-[160px] flex-1 flex-col gap-1.5">
             <label htmlFor="categoria-historial" className="text-micro text-texto-tenue">
               Categoría
             </label>
@@ -220,6 +220,7 @@ export function Historial() {
               id="desde-historial"
               type="date"
               value={desde}
+              max={hasta || undefined}
               onChange={(e) => cambiar(setDesde)(e.target.value)}
               className={control}
             />
@@ -233,6 +234,7 @@ export function Historial() {
               id="hasta-historial"
               type="date"
               value={hasta}
+              min={desde || undefined}
               onChange={(e) => cambiar(setHasta)(e.target.value)}
               className={control}
             />
@@ -272,7 +274,7 @@ export function Historial() {
           pantalla. `pr-1` deja sitio a la barra para que no se monte sobre los
           montos.
         */
-        <div className="flex flex-col max-h-[60dvh] gap-1 pr-1 overflow-y-auto">
+        <div className="flex flex-col gap-1 md:max-h-[60dvh] md:overflow-y-auto md:pr-1">
           {filas.map((m) => (
             <FilaMovimiento
               key={m.id}

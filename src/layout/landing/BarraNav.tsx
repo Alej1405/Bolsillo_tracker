@@ -24,7 +24,7 @@ export function BarraNav() {
             <li key={e.destino}>
               <a
                 href={e.destino}
-                className="text-cuerpo font-medium text-texto-secundario transition-colors hover:text-texto-principal"
+                className="flex min-h-11 items-center text-cuerpo font-medium text-texto-secundario transition-colors hover:text-texto-principal"
               >
                 {e.texto}
               </a>

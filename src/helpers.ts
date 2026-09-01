@@ -140,7 +140,7 @@ export function iniciales(nombre?: string): string {
   tiene que cambiar en todas a la vez.
 */
 export const foco =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-borde-foco'
+  'focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-borde-foco'
 
 /** El aspecto de un campo: los `select`, los `date` y el buscador. */
 export const control = `h-11 rounded-grande border border-borde-fuerte bg-fondo-superficie px-4 text-nota text-texto-principal outline-none ${foco}`

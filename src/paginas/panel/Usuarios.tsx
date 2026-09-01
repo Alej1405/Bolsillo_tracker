@@ -212,7 +212,7 @@ export function Usuarios() {
         mismo a un palmo de distancia.
         `valor` y no `monto`: son cuentas, no dinero.
       */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <Cifra
           etiqueta="En total"
           valor={String(stats?.users.total ?? 0)}

@@ -57,7 +57,7 @@ export function PieDePagina() {
                   <li key={e.texto}>
                     <Link
                       to={e.destino}
-                      className="text-nota text-texto-inverso/60 transition-colors hover:text-texto-inverso"
+                      className="inline-flex min-h-11 items-center text-nota text-texto-inverso/60 transition-colors hover:text-texto-inverso"
                     >
                       {e.texto}
                     </Link>

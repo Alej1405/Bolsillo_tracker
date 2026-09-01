@@ -34,8 +34,10 @@ export function Cifra({
   const color =
     tono === 'ingreso' ? 'text-ingreso' : tono === 'gasto' ? 'text-gasto' : 'text-texto-principal'
 
+  /* `p-4` en el teléfono: en 390px, dos de estas con 20px de relleno a cada
+     lado dejan el número sin sitio. */
   return (
-    <div className="flex flex-col gap-1 rounded-extra bg-fondo-superficie p-5">
+    <div className="flex flex-col gap-1 rounded-extra bg-fondo-superficie p-4 sm:p-5">
       <p className="text-micro tracking-[0.08em] text-texto-tenue uppercase">{etiqueta}</p>
       <p className={`font-cuerpo text-titulo-menor font-bold tabular-nums ${color}`}>
         {valor ?? conSimbolo(monto)}
