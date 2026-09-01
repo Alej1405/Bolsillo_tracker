@@ -5,7 +5,7 @@ import { TarjetaBolsilloPanel } from '@/piezas'
 import { ErrorApi } from '@/services/api'
 import { Boton } from '@/ui/Boton'
 import { Modal } from '@/ui/Modal'
-import { conSimbolo } from '@/utils/moneda'
+import { conSimbolo, enContra } from '@/utils/moneda'
 import { useAppStore } from '@/stores/useAppStore'
 import type { Cuenta } from '@/types'
 
@@ -217,7 +217,35 @@ export function Bolsillos() {
               )}
             </p>
 
-            <div className="flex flex-wrap gap-3">
+            {/*
+              Cuánto hay dentro, cuando lo hay. Un bolsillo con saldo se borra
+              con otra cabeza que uno vacío, y la cifra es justo el dato que
+              hace dudar a tiempo. Se calla si está en cero para no dar peso a
+              lo que no lo tiene.
+            */}
+            {!errorBorrado && Number(dialogo.bolsillo.balance) !== 0 && (
+              <div className="flex items-center justify-between gap-3 rounded-grande bg-fondo-sutil px-4 py-3">
+                <span className="text-nota text-texto-secundario">Ahora mismo tiene</span>
+                <span
+                  className={`font-cuerpo text-cuerpo-amplio font-bold tabular-nums ${
+                    enContra(dialogo.bolsillo.balance) ? 'text-gasto' : 'text-texto-principal'
+                  }`}
+                >
+                  {conSimbolo(dialogo.bolsillo.balance)}
+                </span>
+              </div>
+            )}
+
+            {/*
+              Cancelar primero y borrar al final, igual que en el historial:
+              las dos confirmaciones de la aplicación se leen en el mismo
+              orden, y lo que no tiene vuelta atrás queda lo más lejos posible
+              del sitio donde el dedo cae por costumbre.
+            */}
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Boton variante="secundario" onClick={cerrar}>
+                Cancelar
+              </Boton>
               {errorBorrado ? (
                 <Boton
                   onClick={() => {
@@ -238,9 +266,6 @@ export function Bolsillos() {
                   {ocupado ? 'Borrando…' : 'Sí, borrarlo'}
                 </Boton>
               )}
-              <Boton variante="secundario" onClick={cerrar}>
-                Cancelar
-              </Boton>
             </div>
           </div>
         )}

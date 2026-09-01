@@ -1,5 +1,6 @@
 import { ArchiveIcon, ArrowCounterClockwiseIcon, PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react'
 import { etiquetaDe, iconoDe } from '@/paginas/panel/FormularioBolsillo'
+import { accion, accionDestructiva } from '@/helpers'
 import { Pista } from '@/ui/Pista'
 import { conSimbolo, enContra } from '@/utils/moneda'
 import type { Cuenta } from '@/types'
@@ -15,9 +16,7 @@ import type { Cuenta } from '@/types'
   usa.
 */
 
-/** El botón redondo de cada acción. Uno solo para las cuatro. */
-const ACCION =
-  'grid size-11 place-items-center rounded-medio border border-borde-fuerte bg-fondo-superficie text-texto-secundario transition-colors hover:bg-fondo-sutil focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-borde-foco active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none'
+
 
 /** Una tarjeta de la lista: qué es, cuánto tiene y qué se puede hacer con él. */
 export function TarjetaBolsilloPanel({
@@ -69,7 +68,7 @@ export function TarjetaBolsilloPanel({
 
       <div className="flex items-center gap-2">
         <Pista texto="Editar">
-          <button type="button" onClick={onEditar} disabled={ocupado} className={ACCION}>
+          <button type="button" onClick={onEditar} disabled={ocupado} className={accion}>
             <PencilSimpleIcon size={18} aria-hidden />
             <span className="sr-only">Editar {bolsillo.name}</span>
           </button>
@@ -78,26 +77,30 @@ export function TarjetaBolsilloPanel({
         {/* Archivar y desarchivar son el mismo sitio: nunca aplican los dos. */}
         {archivado ? (
           <Pista texto="Desarchivar">
-            <button type="button" onClick={onDesarchivar} disabled={ocupado} className={ACCION}>
+            <button type="button" onClick={onDesarchivar} disabled={ocupado} className={accion}>
               <ArrowCounterClockwiseIcon size={18} aria-hidden />
               <span className="sr-only">Desarchivar {bolsillo.name}</span>
             </button>
           </Pista>
         ) : (
           <Pista texto="Archivar">
-            <button type="button" onClick={onArchivar} disabled={ocupado} className={ACCION}>
+            <button type="button" onClick={onArchivar} disabled={ocupado} className={accion}>
               <ArchiveIcon size={18} aria-hidden />
               <span className="sr-only">Archivar {bolsillo.name}</span>
             </button>
           </Pista>
         )}
 
+        {/*
+          Separado del grupo con `ml-auto`: lo reversible a un lado y lo que no
+          lo es al otro. Pegado a los demás, el dedo lo alcanza por inercia.
+        */}
         <Pista texto="Borrar">
           <button
             type="button"
             onClick={onBorrar}
             disabled={ocupado}
-            className={`${ACCION} hover:border-gasto hover:text-gasto`}
+            className={`${accionDestructiva} ml-auto`}
           >
             <TrashIcon size={18} aria-hidden />
             <span className="sr-only">Borrar {bolsillo.name}</span>

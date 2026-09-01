@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react'
+import {
+  ArrowCounterClockwiseIcon,
+  CheckCircleIcon,
+  WarningCircleIcon,
+} from '@phosphor-icons/react'
 import { etiquetaDeCategoria, foco, hojasDeCategorias } from '@/helpers'
 import { Campo } from '@/paginas/acceso'
 import { ErrorApi } from '@/services/api'
@@ -123,6 +127,7 @@ export function AnotarGasto({
   const cargarCategorias = useAppStore((e) => e.cargarCategorias)
   const errorCategorias = useAppStore((e) => e.errorCategorias)
   const anotar = useAppStore((e) => e.anotar)
+  const borrarMovimiento = useAppStore((e) => e.borrarMovimiento)
   const anotando = useAppStore((e) => e.anotando)
   const cargarDashboard = useAppStore((e) => e.cargarDashboard)
   const abrirCrearBolsillo = useAppStore((e) => e.abrirCrearBolsillo)
@@ -137,6 +142,15 @@ export function AnotarGasto({
   )
   const [aviso, setAviso] = useState<string | null>(null)
   const [hecho, setHecho] = useState<string | null>(null)
+  /*
+    Lo último anotado, para poder deshacerlo. El `POST` devuelve el movimiento
+    entero, así que basta con quedarse su `id`: deshacer es un `DELETE` de los
+    que ya existen, y en el backend es un borrado lógico —marca `deleted_at` y
+    lo saca de saldos, historial y reportes— así que no hay nada que recalcular.
+  */
+  const [ultimo, setUltimo] = useState<string | null>(null)
+  const [deshaciendo, setDeshaciendo] = useState(false)
+  const [deshecho, setDeshecho] = useState(false)
   /*
     Segundos que faltan para que el popup se cierre solo tras anotar. Empieza
     en 4 y se ve bajar: un diálogo que desaparece sin avisar deja a la persona
@@ -186,7 +200,42 @@ export function AnotarGasto({
   const anotarOtro = useCallback(() => {
     setRestan(null)
     setHecho(null)
+    setUltimo(null)
+    setDeshecho(false)
   }, [])
+
+  /*
+    Deshacer lo que se acaba de anotar.
+
+    Es la salida del error más común y más caro de la aplicación: escribir 55
+    donde iban 5,50. Sin esto hay que salir del diálogo, ir al historial,
+    encontrar el movimiento entre los demás y borrarlo ahí — cuatro pasos para
+    arreglar uno.
+
+    Para la cuenta atrás en cuanto se pulsa: el diálogo no puede cerrarse solo
+    en mitad de una operación que la persona acaba de pedir.
+  */
+  const deshacer = useCallback(async () => {
+    if (!ultimo) return
+    setRestan(null)
+    setDeshaciendo(true)
+    setAviso(null)
+    try {
+      await borrarMovimiento(ultimo)
+      setDeshecho(true)
+      setUltimo(null)
+      void cargarDashboard()
+      void cargarBolsillos()
+    } catch (error) {
+      setAviso(
+        error instanceof Error
+          ? error.message
+          : 'No pudimos deshacerlo. Puedes borrarlo desde el historial.',
+      )
+    } finally {
+      setDeshaciendo(false)
+    }
+  }, [ultimo, borrarMovimiento, cargarDashboard, cargarBolsillos])
 
   // Con un solo bolsillo no hay nada que elegir: se preselecciona.
   useEffect(() => {
@@ -245,6 +294,7 @@ export function AnotarGasto({
             category_id: categoria,
           })
       setHecho(conSimbolo(mov.amount))
+      setUltimo(mov.id)
       setRestan(SEGUNDOS_PARA_CERRAR)
       setMonto('')
       setCategoria('')
@@ -343,6 +393,39 @@ export function AnotarGasto({
     flotando sobre unos campos que ya no corresponden a nada, y no queda claro
     si hay que volver a enviar. Un diálogo, un estado.
   */
+  /*
+    Deshecho: el acuse cambia de tono en vez de desaparecer. Si el diálogo se
+    cerrara de golpe, la persona no sabría si el movimiento se quitó o si se
+    quitó el aviso, y acabaría en el historial comprobándolo.
+  */
+  if (deshecho) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div
+          role="status"
+          className="flex flex-col items-center gap-3 rounded-extra bg-fondo-sutil px-6 py-8 text-center"
+        >
+          <ArrowCounterClockwiseIcon size={40} weight="bold" aria-hidden className="text-texto-secundario" />
+          <p className="font-titulo text-titulo-menor font-bold text-texto-principal">
+            Lo deshicimos
+          </p>
+          <p className="text-cuerpo text-texto-secundario">
+            Ese movimiento ya no cuenta en tus bolsillos ni en tus reportes.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Boton type="button" onClick={anotarOtro}>
+            Anotar de nuevo
+          </Boton>
+          <Boton type="button" variante="secundario" onClick={onCerrar}>
+            Cerrar
+          </Boton>
+        </div>
+      </div>
+    )
+  }
+
   if (hecho) {
     return (
       <div className="flex flex-col gap-6">
@@ -357,7 +440,30 @@ export function AnotarGasto({
           <p className="text-cuerpo text-texto-secundario">
             {hecho} {texto.resultado}
           </p>
+
+          {/*
+            El deshacer vive DENTRO del acuse, no entre los botones de abajo:
+            es la respuesta a "me equivoqué" y tiene que estar donde se lee la
+            cifra, que es lo que se mira para comprobar si está bien.
+          */}
+          {ultimo && (
+            <button
+              type="button"
+              onClick={() => void deshacer()}
+              disabled={deshaciendo}
+              className={`mt-1 inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-nota font-semibold text-texto-principal underline underline-offset-4 transition-colors hover:bg-fondo-superficie disabled:opacity-60 ${foco}`}
+            >
+              <ArrowCounterClockwiseIcon size={16} weight="bold" aria-hidden />
+              {deshaciendo ? 'Deshaciendo…' : '¿Te equivocaste? Deshacer'}
+            </button>
+          )}
         </div>
+
+        {aviso && (
+          <p role="alert" className="rounded-medio bg-gasto-sutil px-4 py-3 text-nota text-gasto">
+            {aviso}
+          </p>
+        )}
 
         <div className="flex flex-wrap items-center gap-3">
           <Boton type="button" onClick={anotarOtro}>

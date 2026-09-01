@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ProhibitIcon, TrashIcon, WarningCircleIcon } from '@phosphor-icons/react'
 import { EsperandoLista } from '@/layout/panel/Esperando'
-import { iniciales } from '@/helpers'
+import { iniciales, accion, accionDestructiva } from '@/helpers'
 import { Paginacion } from '@/piezas'
 import { Boton } from '@/ui/Boton'
 import { Cifra } from '@/ui/Cifra'
@@ -25,9 +25,6 @@ function comoFiltro(filtro: Filtro): boolean | null {
   if (filtro === 'inactivos') return false
   return null
 }
-
-const ACCION =
-  'grid size-11 place-items-center rounded-medio border border-borde-fuerte bg-fondo-superficie text-texto-secundario transition-colors hover:bg-fondo-sutil focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-borde-foco active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none'
 
 /** Una fila del listado: quién es, en qué estado está y qué se puede hacer. */
 function Fila({
@@ -93,7 +90,7 @@ function Fila({
             type="button"
             onClick={onCambiarEstado}
             disabled={ocupado || esTuCuenta}
-            className={ACCION}
+            className={accion}
           >
             <ProhibitIcon size={18} aria-hidden />
             <span className="sr-only">
@@ -107,7 +104,7 @@ function Fila({
             type="button"
             onClick={onBorrar}
             disabled={ocupado || esTuCuenta}
-            className={`${ACCION} hover:border-gasto hover:text-gasto`}
+            className={`${accionDestructiva} ml-auto`}
           >
             <TrashIcon size={18} aria-hidden />
             <span className="sr-only">Borrar definitivamente a {usuario.full_name}</span>

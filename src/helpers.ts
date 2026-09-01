@@ -146,6 +146,26 @@ export const foco =
 export const control = `h-11 rounded-grande border border-borde-fuerte bg-fondo-superficie px-4 text-nota text-texto-principal outline-none ${foco}`
 
 /*
+  El botón redondo de una acción sobre una fila o una tarjeta: editar,
+  archivar, dar de baja, borrar. Vivía copiado en tres pantallas con pequeñas
+  diferencias entre copias.
+*/
+const ACCION_BASE = `grid size-11 shrink-0 place-items-center rounded-medio border transition-colors active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none ${foco}`
+
+/** Una acción que se puede deshacer. */
+export const accion = `${ACCION_BASE} border-borde-fuerte bg-fondo-superficie text-texto-secundario hover:bg-fondo-sutil`
+
+/*
+  Una acción que NO se puede deshacer.
+
+  Se ve distinta en reposo, no al pasar el ratón: con el dedo no hay `hover`,
+  así que un rojo que solo aparece con puntero no avisa a nadie en un teléfono
+  ni en una tableta. Y es justo donde más falta hace, porque el toque es menos
+  preciso que el clic.
+*/
+export const accionDestructiva = `${ACCION_BASE} border-gasto/35 bg-gasto-sutil text-gasto hover:border-gasto hover:bg-gasto hover:text-texto-inverso`
+
+/*
   Lo mismo para un `select`. `appearance-none` quita la flecha que dibuja el
   navegador: esa no se puede mover y queda pegada al borde, así que cada select
   pone la suya con un icono posicionado encima.

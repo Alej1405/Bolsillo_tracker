@@ -8,7 +8,7 @@ import {
   TrashIcon,
   WarningCircleIcon,
 } from '@phosphor-icons/react'
-import { foco } from '@/helpers'
+import { foco, accionDestructiva } from '@/helpers'
 import { urlDeAutorizacionTiktok } from '@/services/SitioService'
 import { Boton } from '@/ui/Boton'
 import { Bloque } from '@/ui/Bloque'
@@ -432,7 +432,7 @@ export function Sitio() {
                     type="button"
                     onClick={() => void quitar(v.video_id)}
                     title="Quitar de la lista"
-                    className={`grid size-11 place-items-center rounded-medio border border-borde-fuerte text-texto-secundario transition-colors hover:border-gasto hover:text-gasto ${foco}`}
+                    className={accionDestructiva}
                   >
                     <TrashIcon size={18} aria-hidden />
                     <span className="sr-only">Quitar {v.title || 'este vídeo'} de la web</span>

@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MagnifyingGlassIcon, XIcon, CaretDownIcon, FunnelIcon } from '@phosphor-icons/react'
+import {
+  MagnifyingGlassIcon,
+  XIcon,
+  CaretDownIcon,
+  FunnelIcon,
+  PencilSimpleIcon,
+  TrashIcon,
+} from '@phosphor-icons/react'
 import { EsperandoLista } from '@/layout/panel/Esperando'
 import { aFilas } from '@/paginas/panel/adaptadores'
 import { FilaMovimiento } from '@/piezas'
@@ -7,6 +14,8 @@ import { Boton } from '@/ui/Boton'
 import { Paginacion } from '@/piezas'
 import { Ficha } from '@/ui/Ficha'
 import { control, etiquetaDeCategoria, foco, hojasDeCategorias, selector } from '@/helpers'
+import { EditarMovimiento } from '@/paginas/panel/EditarMovimiento'
+import { Modal } from '@/ui/Modal'
 import { Hoja } from '@/layout/celular/Hoja'
 import { useTipoPantalla } from '@/pantalla'
 import { useAppStore } from '@/stores/useAppStore'
@@ -41,6 +50,8 @@ export function Historial() {
   const cargarHistorial = useAppStore((e) => e.cargarHistorial)
   const bolsillos = useAppStore((e) => e.bolsillos)
   const cargarBolsillos = useAppStore((e) => e.cargarBolsillos)
+  const borrarMovimiento = useAppStore((e) => e.borrarMovimiento)
+  const cargarDashboard = useAppStore((e) => e.cargarDashboard)
   /* Las de gasto: son las que se usan para filtrar el historial. */
   const categorias = useAppStore((e) => e.categorias).expense
   const cargarCategorias = useAppStore((e) => e.cargarCategorias)
@@ -114,6 +125,42 @@ export function Historial() {
   const elegibles = useMemo(() => hojasDeCategorias(categorias), [categorias])
   const esCelular = useTipoPantalla() === 'celular'
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
+
+  /*
+    El movimiento que se va a borrar, o `null`. Se guarda la fila entera y no
+    solo el id porque la confirmación tiene que enseñar QUÉ se borra: "¿borrar
+    este movimiento?" a secas obliga a recordar cuál se pulsó.
+  */
+  const [porBorrar, setPorBorrar] = useState<(typeof filas)[number] | null>(null)
+  const [porEditar, setPorEditar] = useState<string | null>(null)
+  /* En el teléfono las acciones no caben en la fila: salen en una hoja. */
+  const [conAcciones, setConAcciones] = useState<(typeof filas)[number] | null>(null)
+  const [borrando, setBorrando] = useState(false)
+  const [errorBorrado, setErrorBorrado] = useState<string | null>(null)
+
+  /*
+    Desde el historial no es deshacer, es borrar: puede ser de hace semanas y
+    el backend no sabe restaurar. Por eso pasa por confirmación, mientras que
+    justo después de anotar basta con un toque.
+  */
+  const confirmarBorrado = async () => {
+    if (!porBorrar) return
+    setBorrando(true)
+    setErrorBorrado(null)
+    try {
+      await borrarMovimiento(porBorrar.id)
+      setPorBorrar(null)
+      void cargarHistorial(filtros)
+      void cargarDashboard()
+      void cargarBolsillos()
+    } catch (error) {
+      setErrorBorrado(
+        error instanceof Error ? error.message : 'No pudimos borrar el movimiento.',
+      )
+    } finally {
+      setBorrando(false)
+    }
+  }
 
   /*
     Los campos, escritos una sola vez. En el teléfono viven dentro de la hoja y
@@ -339,6 +386,15 @@ export function Historial() {
               detalle={m.detalle}
               monto={m.monto}
               clase={m.clase}
+              {...(esCelular
+                ? { onAcciones: () => setConAcciones(m) }
+                : {
+                    onEditar: () => setPorEditar(m.id),
+                    onBorrar: () => {
+                      setErrorBorrado(null)
+                      setPorBorrar(m)
+                    },
+                  })}
             />
           ))}
         </div>
@@ -360,6 +416,128 @@ export function Historial() {
           <Paginacion pagina={pagina} paginas={paginas} ir={setPagina} variante="pasos" />
         </div>
       )}
+      <Modal
+        abierto={porEditar !== null}
+        onCerrar={() => setPorEditar(null)}
+        titulo="Corregir movimiento"
+      >
+        {porEditar && (
+          <EditarMovimiento
+            id={porEditar}
+            onCerrar={() => setPorEditar(null)}
+            onListo={() => {
+              setPorEditar(null)
+              void cargarHistorial(filtros)
+              void cargarDashboard()
+              void cargarBolsillos()
+            }}
+          />
+        )}
+      </Modal>
+
+      <Modal
+        abierto={porBorrar !== null}
+        onCerrar={() => setPorBorrar(null)}
+        titulo="Borrar movimiento"
+      >
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-2">
+            <h2 className="font-titulo text-titulo-menor font-bold text-texto-principal">
+              ¿Borrar este movimiento?
+            </h2>
+            <p className="text-cuerpo leading-relaxed text-texto-secundario">
+              Dejará de contar en tus bolsillos y en tus reportes. Esto no se puede deshacer.
+            </p>
+          </div>
+
+          {/* Qué se borra, con las mismas palabras con que aparece en la lista. */}
+          {porBorrar && (
+            <div className="flex items-center gap-3 rounded-extra bg-fondo-sutil px-4 py-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-cuerpo font-medium text-texto-principal">
+                  {porBorrar.nombre}
+                </p>
+                <p className="truncate text-nota text-texto-tenue">{porBorrar.detalle}</p>
+              </div>
+              <span className="text-cuerpo font-semibold tabular-nums text-texto-principal">
+                {porBorrar.monto}
+              </span>
+            </div>
+          )}
+
+          {errorBorrado && (
+            <p role="alert" className="rounded-medio bg-gasto-sutil px-4 py-3 text-nota text-gasto">
+              {errorBorrado}
+            </p>
+          )}
+
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Boton type="button" variante="secundario" onClick={() => setPorBorrar(null)}>
+              Cancelar
+            </Boton>
+            {/*
+              `peligro` y no el botón por defecto: es la única acción de esta
+              pantalla que no se puede revertir, y tiene que verse distinta.
+            */}
+            <Boton
+              type="button"
+              variante="peligro"
+              onClick={() => void confirmarBorrado()}
+              disabled={borrando}
+            >
+              {borrando ? 'Borrando…' : 'Sí, borrar'}
+            </Boton>
+          </div>
+        </div>
+      </Modal>
+
+      {/*
+        Las acciones, con su nombre escrito. En la fila eran dos iconos sin
+        etiqueta; aquí se lee "Corregir" y "Borrar", y borrar puede ir en rojo
+        sin competir con el monto de la lista.
+      */}
+      <Hoja
+        abierta={conAcciones !== null}
+        onCerrar={() => setConAcciones(null)}
+        titulo={conAcciones ? conAcciones.nombre : 'Movimiento'}
+      >
+        <ul className="flex flex-col py-2">
+          <li>
+            <button
+              type="button"
+              onClick={() => {
+                const m = conAcciones
+                setConAcciones(null)
+                if (m) setPorEditar(m.id)
+              }}
+              className={`flex min-h-[52px] w-full items-center gap-3 rounded-grande px-2 text-cuerpo text-texto-principal transition-colors active:scale-[0.99] active:bg-fondo-sutil ${foco}`}
+            >
+              <span className="grid size-9 shrink-0 place-items-center rounded-medio bg-fondo-sutil text-texto-secundario">
+                <PencilSimpleIcon size={18} aria-hidden />
+              </span>
+              Corregir
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              onClick={() => {
+                const m = conAcciones
+                setConAcciones(null)
+                setErrorBorrado(null)
+                if (m) setPorBorrar(m)
+              }}
+              className={`flex min-h-[52px] w-full items-center gap-3 rounded-grande px-2 text-cuerpo text-gasto transition-colors active:scale-[0.99] active:bg-gasto-sutil ${foco}`}
+            >
+              <span className="grid size-9 shrink-0 place-items-center rounded-medio bg-gasto-sutil text-gasto">
+                <TrashIcon size={18} aria-hidden />
+              </span>
+              Borrar
+            </button>
+          </li>
+        </ul>
+      </Hoja>
+
       <Hoja
         abierta={esCelular && filtrosAbiertos}
         onCerrar={() => setFiltrosAbiertos(false)}
