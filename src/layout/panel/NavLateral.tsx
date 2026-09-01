@@ -1,11 +1,10 @@
 import { NavLink } from 'react-router-dom'
 import { motion } from 'motion/react'
+import { Avatar } from '@/piezas'
 import { Boton } from '@/ui/Boton'
 import { DESTINOS } from '@/layout/panel/destinos'
 import type { Destino } from '@/layout/panel/destinos'
 import { escalonado, useAparicion } from '@/movimiento'
-import { iniciales } from '@/helpers'
-import { urlDeMedio } from '@/utils/medios'
 import { useAppStore } from '@/stores/useAppStore'
 import logo from '@/assets/logo.png'
 
@@ -67,7 +66,6 @@ function Enlace({ a, etiqueta, Icono }: Destino) {
 export function NavLateral() {
   const usuario = useAppStore((e) => e.usuario)
   const nombre = usuario?.full_name
-  const foto = urlDeMedio(usuario?.avatar_url)
   const aparece = useAparicion()
   const abrirGasto = useAppStore((e) => e.abrirGasto)
   const abrirIngreso = useAppStore((e) => e.abrirIngreso)
@@ -103,11 +101,7 @@ export function NavLateral() {
           `alt=""` porque el nombre ya lo lee el `sr-only` de arriba: repetirlo
           haría que un lector de pantalla dijera dos veces lo mismo.
         */}
-        {foto ? (
-          <img src={foto} alt="" className="size-full object-cover" />
-        ) : (
-          <span aria-hidden>{iniciales(nombre)}</span>
-        )}
+        <Avatar url={usuario?.avatar_url} nombre={nombre} className="size-full" />
       </p>
 
       <nav

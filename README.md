@@ -316,6 +316,12 @@ sumas aquí sería probar algo que este proyecto no hace.
 
 ## Dónde tocar cada cosa
 
+**La foto de perfil se pinta con `<Avatar>`** (`src/piezas/Avatar.tsx`), en los tres
+sitios donde aparece: la barra lateral, la cabecera del teléfono y Mi cuenta. Si la
+imagen no carga, muestra las iniciales en vez del icono de imagen rota del navegador —que
+parece un error de la aplicación aunque el problema esté en el servidor.
+
+
 | Quiero… | Voy a… |
 |---|---|
 | Cambiar el ritmo de las animaciones | `src/movimiento/curvas.ts` — cambia toda la interfaz de golpe |

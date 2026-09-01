@@ -4,6 +4,7 @@ import { CheckCircleIcon, SignOutIcon, UserIcon, WarningCircleIcon } from '@phos
 import { Campo } from '@/paginas/acceso'
 import { ErrorApi } from '@/services/api'
 import { Bloque } from '@/ui/Bloque'
+import { Avatar } from '@/piezas'
 import { Boton } from '@/ui/Boton'
 import { Modal } from '@/ui/Modal'
 import { useCerrarSesion } from '@/helpers'
@@ -145,11 +146,12 @@ export function MiCuenta() {
       >
         <div className="flex flex-wrap items-center gap-5">
           <span className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-full bg-lavanda-200 text-lavanda-950">
-            {foto ? (
-              <img src={foto} alt="Tu foto de perfil" className="size-full object-cover" />
-            ) : (
-              <UserIcon size={28} aria-hidden />
-            )}
+            <Avatar
+              url={usuario?.avatar_url}
+              alt="Tu foto de perfil"
+              className="grid size-full place-items-center"
+              respaldo={<UserIcon size={28} aria-hidden />}
+            />
           </span>
 
           <div className="flex flex-1 flex-col gap-3">

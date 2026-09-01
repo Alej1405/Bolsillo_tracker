@@ -11,10 +11,9 @@ import { tituloDe } from '@/layout/panel/destinos'
 import { Fondo } from '@/layout/landing/Fondo'
 import { AnotarGasto } from '@/paginas/panel/AnotarGasto'
 import { FormularioBolsillo } from '@/paginas/panel/FormularioBolsillo'
-import { PrimerBolsillo, ResumenRendimiento } from '@/piezas'
+import { Avatar, PrimerBolsillo, ResumenRendimiento } from '@/piezas'
 import { Modal } from '@/ui/Modal'
-import { iniciales, nombreDelMes, rangoDelMes, useCerrarSesion } from '@/helpers'
-import { urlDeMedio } from '@/utils/medios'
+import { nombreDelMes, rangoDelMes, useCerrarSesion } from '@/helpers'
 import { formatearMonto } from '@/utils/moneda'
 import { useAppStore } from '@/stores/useAppStore'
 
@@ -72,7 +71,6 @@ export function ArmazonPanelCelular() {
     setMasAbierto(false)
   }, [pathname])
 
-  const foto = urlDeMedio(usuario?.avatar_url)
   const neto = dashboard?.summary?.net
   const enContra = neto?.trim().startsWith('-')
   /* Igual que en escritorio: cero no es un mes en positivo. */
@@ -91,16 +89,12 @@ export function ArmazonPanelCelular() {
         no en qué pantalla estás.
       */}
       <header className="vidrio sticky top-0 z-30 flex items-center gap-3 border-b border-borde-sutil px-4 py-3 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
-        <NavLink
-          to="/mi-cuenta"
-          aria-label="Tu cuenta"
-          className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-lavanda-200 text-micro font-semibold text-lavanda-950"
-        >
-          {foto ? (
-            <img src={foto} alt="" className="size-full object-cover" />
-          ) : (
-            iniciales(usuario?.full_name)
-          )}
+        <NavLink to="/mi-cuenta" aria-label="Tu cuenta" className="shrink-0">
+          <Avatar
+            url={usuario?.avatar_url}
+            nombre={usuario?.full_name}
+            className="grid size-11 place-items-center overflow-hidden rounded-full bg-lavanda-200 text-micro font-semibold text-lavanda-950"
+          />
         </NavLink>
 
         <h1 className="min-w-0 flex-1 truncate font-cuerpo text-nota font-bold text-texto-principal">
