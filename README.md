@@ -256,6 +256,61 @@ npm run dev
 | `npm run build` | `tsc -b` y compilación de producción a `dist/` |
 | `npm run preview` | Sirve el `dist/` compilado, para revisar antes de subir |
 | `npm run lint` | Oxlint |
+| `npm test` | Las pruebas, una vez |
+| `npm run test:mirar` | Las pruebas en marcha, repitiéndose al guardar |
+
+---
+
+## Pruebas
+
+**76 pruebas** con Vitest y Testing Library. Corren en segundos y no necesitan ni
+servidor ni base de datos.
+
+```bash
+npm test
+```
+
+| Archivo | Qué prueba |
+|---|---|
+| `dinero.prueba.ts` | Formato del dinero: el punto de miles, la coma decimal, el signo |
+| `helpers.prueba.ts` | Fechas, atajos del historial, árbol de categorías, iniciales |
+| `medida.prueba.ts` | Cómo se escribe cada medida de rendimiento según su unidad |
+| `FilaMovimiento.prueba.tsx` | La fila del historial y sus acciones |
+| `PrimerBolsillo.prueba.tsx` | El diálogo bloqueante de quien no tiene bolsillos |
+| `ResumenRendimiento.prueba.tsx` | Cuándo el resumen del mes debe interrumpir y cuándo no |
+
+Viven en `src/pruebas/` y terminan en `.prueba.ts` o `.prueba.tsx`, no en `.test.ts`:
+todo el proyecto está nombrado en español y esto no es la excepción.
+
+### Qué se prueba, y qué no
+
+**Sí:** las reglas y los formatos que, si fallan, se ven en el saldo de alguien. La que
+más importa está en `dinero.prueba.ts`:
+
+```ts
+it('el punto decimal se respeta: es como está el dato en la base', () => {
+  expect(aMontoDelBackend('1000.50')).toBe('1000.50')
+})
+```
+
+Una versión anterior quitaba **todos** los puntos sin mirar, así que quien escribía
+`1000.50` enviaba `100050` y anotaba un gasto cien veces mayor. Nadie teclea el separador
+de miles a mano; el punto decimal sí.
+
+**Sí:** cuándo un diálogo debe aparecer y —sobre todo— cuándo **no**. El modal de primer
+bolsillo no se puede cerrar, así que un falso positivo bloquea la aplicación entera. Y el
+resumen del mes no debe salir el día 1 a decir «$0,00, todavía no hay movimientos»:
+interrumpir para no contar nada enseña a cerrar sin leer.
+
+**Sí:** que las acciones destructivas se distingan **en reposo**, sin pasar el ratón. Con
+el dedo no hay `hover`, y ese fue justo el fallo que encontró la auditoría heurística.
+
+**No:** las animaciones. `motion` se sustituye por elementos planos en `preparar.ts`,
+porque jsdom no ejecuta animaciones y el elemento nunca llegaría a ser «visible». Cómo
+entra algo en pantalla se juzga mirándolo, no contándolo.
+
+**No:** los cálculos. El backend manda la cifra final y aquí solo se escribe; probar
+sumas aquí sería probar algo que este proyecto no hace.
 
 ---
 
